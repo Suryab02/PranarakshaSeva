@@ -1,8 +1,11 @@
 # PranarakshaSeva
-# Pranaraksha Seva Web App: A professionally developed React-based application that offers efficient access to vital healthcare services.
-# Role-based Access: The Login component differentiates between guests and administrators, providing secure access and tailored functions.
-# Guest Services: The GuestServices component empowers users to check blood availability, verify doctors, and request ambulances, all powered by real-time Axios data fetching.
-# Robust Database Integration: Seamless integration of database technologies ensures reliable and responsive performance, enhancing data retrieval and storage efficiency.
+Pranaraksha Seva Web App: A professionally developed React-based application that offers efficient access to vital healthcare services.
+
+Role-based Access: The Login component differentiates between guests and administrators, providing secure access and tailored functions.
+
+Guest Services: The GuestServices component empowers users to check blood availability, verify doctors, and request ambulances, all powered by real-time Axios data fetching.
+
+Robust Database Integration: Seamless integration of database technologies ensures reliable and responsive performance, enhancing data retrieval and storage efficiency.
 
 HOME PAGE:
 
