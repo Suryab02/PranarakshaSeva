@@ -1,0 +1,41 @@
+.blood-container {
+  text-align: center;
+}
+
+.blood-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.blood-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.blood-card {
+  background-color: #f2f2f2;
+  border-radius: 10px;
+  padding: 20px;
+  margin: 10px;
+  width: 300px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.blood-type {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.blood-availability {
+  margin-top: 10px;
+}
+
+.blood-bank {
+  margin-top: 10px;
+}
+
+.blood-city {
+  margin-top: 10px;
+}

@@ -1,0 +1,50 @@
+.ClientAmbulance {
+  display: flex;
+  justify-content: center;
+}
+
+.ClientAmbulance .container {
+  width: 100%;
+  max-width: 800px;
+}
+
+.inside {
+  background-color: #f2f2f2;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.ambulance-title {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.ambulance-info-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-gap: 20px;
+}
+
+.ambulance-info-card {
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.ambulance-city {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.ambulance-contact {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.ambulance-hospital {
+  font-size: 16px;
+}

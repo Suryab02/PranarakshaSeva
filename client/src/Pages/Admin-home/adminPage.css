@@ -1,0 +1,98 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 100vh;
+  background-color: #fff;
+  font-family: "Roboto", sans-serif;
+}
+.heading {
+  text-align: center;
+}
+.admin-container .admin-drop {
+  position: relative;
+  background-color: rgb(210, 43, 43);
+  width: 500px;
+  height: 500px;
+  transition: 1s;
+  box-shadow: inset 20px 20px 20px #d22b2b, 25px 35px 20px rgba(0, 0, 0, 0.05),
+    25px 30px 30px rgba(0, 0, 0, 0.05), inset -20px -20px 25px #d22b2b;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 52% 48% 33% 67% / 38% 45% 55% 62%;
+  transform: rotate(0deg);
+  z-index: 1;
+}
+
+.admin-content {
+  position: absolute;
+  top: 100px;
+  z-index: -1;
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.5s;
+}
+
+.admin-content h2 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.admin-content button {
+  height: 40px;
+  width: 150px;
+  margin: 10px;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  background-color: #fff;
+  color: #d22b2b;
+  border: none;
+}
+
+.admin-content button:hover {
+  cursor: pointer;
+  background-color: #d22b2b;
+  color: #fff;
+}
+
+form input {
+  display: block;
+  width: 100%;
+  margin: 20px 0;
+  padding: 2px;
+  background-color: #fafafa;
+  border: 0;
+  border-radius: 10px;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+  transition: 0.3s box-shadow;
+}
+
+form input:hover {
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
+}
+.container {
+  margin-top: 2rem;
+}
+.first {
+  color: white;
+}
+
+.admin-form-control {
+  width: 100%;
+  padding: 5px;
+
+  border-radius: 5px;
+}

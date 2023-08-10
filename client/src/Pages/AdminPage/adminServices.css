@@ -1,0 +1,87 @@
+.admin-services {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  background-color: #f8f8f8;
+  border: 1px solid #d22b2b;
+  border-radius: 5px;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  margin-left: 1rem;
+}
+
+.admin-buttons {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.admin-buttons button {
+  margin-left: 1rem;
+}
+
+.admin-services-list {
+  margin-top: 1rem;
+}
+
+.admin-services-list h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #d22b2b;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  text-align: left;
+  padding: 0.5rem;
+}
+
+thead {
+  background-color: #d22b2b;
+  color: white;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+input[type="number"] {
+  width: 6rem;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 1rem;
+  text-align: center;
+}
+
+input[type="number"]:focus {
+  outline: none;
+  border-color: #d22b2b;
+}
+
+.update-button, .delete-button {
+  background-color: white;
+  border: 1px solid #d22b2b;
+  border-radius: 3px;
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.update-button:hover, .delete-button:hover {
+  background-color: #d22b2b;
+  color: white;
+}
+
+.update-button:disabled, .delete-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
