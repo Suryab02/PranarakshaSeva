@@ -6,12 +6,18 @@ import LoadingSpinner from '../components/LoadingSpinner'
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
 
 export default function AdminDashboard() {
-  const { bankname } = useLocation().state ?? {}
+  const location = useLocation()
   const navigate = useNavigate()
+  const banknameFromState = location.state?.bankname
+  const bankname = banknameFromState ?? localStorage.getItem('bankname') ?? null
   const [inventory, setInventory] = useState({})
   const [editing, setEditing] = useState({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(null)
+
+  useEffect(() => {
+    if (banknameFromState) localStorage.setItem('bankname', banknameFromState)
+  }, [banknameFromState])
 
   useEffect(() => {
     if (!bankname) { navigate('/admin'); return }
@@ -63,7 +69,7 @@ export default function AdminDashboard() {
             <p className="text-gray-500 text-sm">Blood Inventory Management</p>
           </div>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => { localStorage.removeItem('bankname'); navigate('/') }}
             className="text-sm border border-red-200 text-red-600 hover:bg-red-50 px-4 py-2 rounded-xl transition-colors"
           >
             Sign Out

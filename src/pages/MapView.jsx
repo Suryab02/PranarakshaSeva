@@ -53,7 +53,7 @@ export default function MapView() {
     </div>
   )
 
-  const jitter = (i) => (Math.random() - 0.5) * 0.02
+  const jitter = (i) => ((i % 7) - 3) * 0.003
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-10">

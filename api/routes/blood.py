@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Query, HTTPException
+from pymongo import ReturnDocument
 from api.database import get_db
 from api.models import BloodCreate, BloodUpdate
 
@@ -42,7 +43,7 @@ async def update_inventory(body: BloodUpdate, bank: str = Query(...)):
         {"bankname": bank, "name": body.name},
         {"$set": {"quantity": body.count}},
         upsert=True,
-        return_document=True,
+        return_document=ReturnDocument.AFTER,
     )
     return serialize(result)
 
