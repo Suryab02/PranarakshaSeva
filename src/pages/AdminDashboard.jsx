@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import LoadingSpinner from '../components/LoadingSpinner'
 
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
 
@@ -55,88 +54,86 @@ export default function AdminDashboard() {
   }
 
   if (loading) return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-      <LoadingSpinner text="Loading inventory..." />
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+      <div className="text-center">
+        <div className="w-8 h-8 border-2 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <p className="text-zinc-500 text-sm">Loading inventory...</p>
+      </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-10">
-      <div className="max-w-3xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
+    <div className="min-h-screen bg-white flex flex-col">
+      {/* Dark header */}
+      <div className="bg-zinc-950 px-5 pt-10 pb-8">
+        <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">{bankname}</h1>
-            <p className="text-gray-500 text-sm">Blood Inventory Management</p>
+            <p className="text-zinc-600 text-xs font-bold uppercase tracking-widest mb-1">Blood Bank</p>
+            <h1 className="text-2xl font-black text-white leading-tight">{bankname}</h1>
+            <p className="text-zinc-500 text-sm mt-0.5">Inventory Management</p>
           </div>
           <button
             onClick={() => { localStorage.removeItem('bankname'); navigate('/') }}
-            className="text-sm border border-red-200 text-red-600 hover:bg-red-50 px-4 py-2 rounded-xl transition-colors"
+            className="border border-zinc-800 hover:border-zinc-600 text-zinc-500 hover:text-zinc-300 text-sm font-medium px-4 py-2 rounded-xl transition-colors mt-1"
           >
             Sign Out
           </button>
         </div>
+      </div>
 
-        <div className="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
-          <div className="px-5 py-4 border-b border-gray-100">
-            <p className="text-sm text-gray-500">
-              Update the quantity for each blood type. Leave blank if not available.
-            </p>
-          </div>
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="px-5 py-3 text-left font-semibold text-gray-600">Blood Type</th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-600">Quantity (units)</th>
-                <th className="px-5 py-3 text-left font-semibold text-gray-600">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {BLOOD_TYPES.map((name) => (
-                <tr key={name} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-5 py-3.5">
-                    <span className="bg-red-600 text-white text-xs font-bold px-2.5 py-1 rounded-full">
-                      {name}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <input
-                      type="number"
-                      min="0"
-                      placeholder={inventory[name] !== undefined ? String(inventory[name]) : 'Not set'}
-                      value={editing[name] ?? ''}
-                      onChange={(e) =>
-                        setEditing((prev) => ({ ...prev, [name]: e.target.value }))
-                      }
-                      className="w-28 border border-gray-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
-                    />
-                    {inventory[name] !== undefined && editing[name] === undefined && (
-                      <span className="ml-2 text-gray-400 text-xs">
-                        Current: {inventory[name]}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3.5">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleUpdate(name)}
-                        disabled={editing[name] === undefined || saving === name}
-                        className="bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                      >
-                        {saving === name ? '...' : '✓ Update'}
-                      </button>
-                      <button
-                        onClick={() => handleDelete(name)}
-                        disabled={inventory[name] === undefined || saving === name + '_del'}
-                        className="bg-red-100 hover:bg-red-500 hover:text-white disabled:opacity-40 text-red-600 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                      >
-                        {saving === name + '_del' ? '...' : '✕ Remove'}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {/* Inventory cards */}
+      <div className="flex-1 px-4 pt-4 pb-10">
+        <p className="text-gray-400 text-xs mb-4 px-1">
+          Tap a row to update quantity. Set to 0 or remove if unavailable.
+        </p>
+        <div className="space-y-2">
+          {BLOOD_TYPES.map((name) => (
+            <div
+              key={name}
+              className="border border-gray-100 rounded-2xl px-4 py-3.5 flex items-center gap-3"
+            >
+              {/* Blood type badge */}
+              <div className="bg-red-600 w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-black text-xs">{name}</span>
+              </div>
+
+              {/* Current qty */}
+              <div className="flex-1 min-w-0">
+                <p className="text-gray-500 text-xs mb-1">
+                  {inventory[name] !== undefined
+                    ? <span className="text-gray-800 font-bold">{inventory[name]} units</span>
+                    : <span className="text-gray-300">Not set</span>
+                  }
+                </p>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="Enter quantity"
+                  value={editing[name] ?? ''}
+                  onChange={(e) => setEditing((prev) => ({ ...prev, [name]: e.target.value }))}
+                  className="w-full border border-gray-200 focus:border-red-500 rounded-lg px-3 py-1.5 text-sm text-gray-800 focus:outline-none transition-colors"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex flex-col gap-1.5 flex-shrink-0">
+                <button
+                  onClick={() => handleUpdate(name)}
+                  disabled={editing[name] === undefined || saving === name}
+                  className="bg-emerald-500 hover:bg-emerald-600 disabled:opacity-30 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors w-16 text-center"
+                >
+                  {saving === name ? '...' : 'Save'}
+                </button>
+                <button
+                  onClick={() => handleDelete(name)}
+                  disabled={inventory[name] === undefined || saving === name + '_del'}
+                  className="bg-gray-100 hover:bg-red-500 hover:text-white disabled:opacity-30 text-gray-500 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors w-16 text-center"
+                >
+                  {saving === name + '_del' ? '...' : 'Clear'}
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
