@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -15,7 +19,6 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -27,14 +30,22 @@ app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
 app.include_router(donor.router, prefix="/api/donor", tags=["Donor"])
 
 
+@app.get("/api/health")
+def health():
+    return {
+        "status": "ok",
+        "mongo_uri_set": bool(os.environ.get("MONGO_URI")),
+    }
+
+
 @app.get("/")
 def root():
     return {"app": "PranarakshaSeva API", "version": "2.0", "docs": "/docs"}
 
 
-# Vercel serverless handler
 try:
     from mangum import Mangum
     handler = Mangum(app, lifespan="off")
 except ImportError:
     pass
+

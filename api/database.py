@@ -7,5 +7,8 @@ _client: AsyncIOMotorClient = None
 def get_db():
     global _client
     if _client is None:
-        _client = AsyncIOMotorClient(environ["MONGO_URI"])
+        uri = environ.get("MONGO_URI")
+        if not uri:
+            raise RuntimeError("MONGO_URI environment variable is not set")
+        _client = AsyncIOMotorClient(uri)
     return _client["pranarakshaseva"]
