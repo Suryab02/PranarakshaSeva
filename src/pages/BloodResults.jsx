@@ -1,36 +1,54 @@
-import { useLocation } from 'react-router-dom'
-import Navbar from '../components/Navbar'
-import EmptyState from '../components/EmptyState'
+import { useLocation, useNavigate } from 'react-router-dom'
 import SOSButton from '../components/SOSButton'
 
 export default function BloodResults() {
+  const navigate = useNavigate()
   const { availabilities = [], city, blood } = useLocation().state ?? {}
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-10">
-      <div className="max-w-2xl mx-auto">
-        <Navbar back="/guest/info" />
-        <h1 className="text-2xl font-bold text-gray-800 mb-1">Blood Availability</h1>
-        <p className="text-gray-500 text-sm mb-6">
-          📍 {city} {blood && <span className="text-red-600">• 🩸 {blood}</span>}
-        </p>
+    <div className="min-h-screen bg-white flex flex-col">
+      <div className="bg-zinc-950 px-5 pt-10 pb-8">
+        <button
+          onClick={() => navigate('/guest/info', { state: { city, blood } })}
+          className="text-zinc-600 hover:text-zinc-300 text-sm font-medium mb-6 flex items-center gap-1.5 transition-colors"
+        >
+          ← Back
+        </button>
+        <h1 className="text-3xl font-black text-white">Blood Banks</h1>
+        <div className="flex items-center gap-2 mt-1.5">
+          <span className="text-zinc-400 text-sm">{city}</span>
+          {blood && (
+            <span className="bg-red-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">{blood}</span>
+          )}
+        </div>
+      </div>
 
+      <div className="flex-1 px-5 pt-4 pb-24">
         {availabilities.length === 0 ? (
-          <EmptyState icon="🩸" message="No blood banks found for your search." />
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-14 h-14 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
+              <svg viewBox="0 0 24 24" fill="#dc2626" className="w-7 h-7">
+                <path d="M12 2L5.5 12C5.5 15.59 8.41 18.5 12 18.5S18.5 15.59 18.5 12L12 2Z" />
+              </svg>
+            </div>
+            <p className="font-bold text-gray-800">No results found</p>
+            <p className="text-gray-400 text-sm mt-1">No blood banks match your search in {city}.</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-3">
             {availabilities.map((a, i) => (
-              <div key={i} className="bg-white rounded-2xl shadow-md border border-gray-100 p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="bg-red-600 text-white text-sm font-bold px-3 py-1 rounded-full">
-                    {a.name}
-                  </span>
-                  <span className="text-gray-500 text-sm">
-                    {a.quantity} <span className="text-xs">units</span>
-                  </span>
+              <div key={i} className="border border-gray-100 rounded-2xl p-4 flex items-center gap-4">
+                <div className="bg-red-600 w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-black text-sm">{a.name}</span>
                 </div>
-                <p className="font-semibold text-gray-800">{a.bankname}</p>
-                <p className="text-gray-400 text-sm mt-0.5">📍 {a.city}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-gray-900 truncate">{a.bankname}</p>
+                  <p className="text-gray-400 text-sm mt-0.5">{a.city}</p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className="font-black text-gray-900 text-lg">{a.quantity}</p>
+                  <p className="text-gray-400 text-xs">units</p>
+                </div>
               </div>
             ))}
           </div>
