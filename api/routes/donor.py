@@ -10,7 +10,7 @@ def serialize(doc) -> dict:
     return doc
 
 
-@router.get("/")
+@router.get("")
 async def get_donors(city: str = Query(...), blood: str = Query(None)):
     db = get_db()
     query = {"city": city, "available": True}
@@ -20,7 +20,7 @@ async def get_donors(city: str = Query(...), blood: str = Query(None)):
     return [serialize(d) for d in docs]
 
 
-@router.post("/", status_code=201)
+@router.post("", status_code=201)
 async def register_donor(body: DonorCreate):
     db = get_db()
     result = await db["donors"].insert_one(body.model_dump())

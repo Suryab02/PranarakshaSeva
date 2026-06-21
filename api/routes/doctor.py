@@ -10,14 +10,14 @@ def serialize(doc) -> dict:
     return doc
 
 
-@router.get("/")
+@router.get("")
 async def get_doctors(city: str = Query(...)):
     db = get_db()
     docs = await db["doctors"].find({"city": city}).to_list(100)
     return [serialize(d) for d in docs]
 
 
-@router.post("/", status_code=201)
+@router.post("", status_code=201)
 async def add_doctor(body: DoctorCreate):
     db = get_db()
     result = await db["doctors"].insert_one(body.model_dump())

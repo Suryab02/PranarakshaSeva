@@ -11,7 +11,7 @@ def serialize(doc) -> dict:
     return doc
 
 
-@router.get("/")
+@router.get("")
 async def get_blood(city: str = Query(...), blood: str = Query(None)):
     db = get_db()
     query = {"city": city}
@@ -21,7 +21,7 @@ async def get_blood(city: str = Query(...), blood: str = Query(None)):
     return [serialize(d) for d in docs]
 
 
-@router.post("/", status_code=201)
+@router.post("", status_code=201)
 async def add_blood(body: BloodCreate):
     db = get_db()
     result = await db["bloods"].insert_one(body.model_dump())
