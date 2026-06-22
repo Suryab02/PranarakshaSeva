@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Header, HTTPException
 from api.database import get_db
+import os
 
 router = APIRouter()
 
@@ -80,7 +81,8 @@ USERS = [
 
 @router.post("/run")
 async def run_seed(x_seed_key: str = Header(...)):
-    if x_seed_key != "pranarakshaseva-seed-2024":
+    expected = os.environ.get("SEED_KEY", "")
+    if not expected or x_seed_key != expected:
         raise HTTPException(status_code=403, detail="Invalid seed key")
 
     db = get_db()
