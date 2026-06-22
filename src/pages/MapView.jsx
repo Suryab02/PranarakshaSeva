@@ -27,7 +27,7 @@ const redIcon    = makeIcon('#dc2626', 14)
 const greenIcon  = makeIcon('#16a34a', 11)
 const orangeIcon = makeIcon('#f97316', 11)
 
-// Fetch nodes AND ways from Overpass, normalise to {id, lat, lon, tags}
+// GET request avoids CORS preflight that Overpass rejects on POST
 async function fetchOverpass(lat, lng, amenities, radiusM = 15000) {
   const filters = amenities.flatMap((a) => [
     `node["amenity"="${a}"](around:${radiusM},${lat},${lng});`,
@@ -35,12 +35,9 @@ async function fetchOverpass(lat, lng, amenities, radiusM = 15000) {
   ]).join('')
 
   const query = `[out:json][timeout:20];(${filters});out center;`
+  const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`
 
-  const res = await fetch('https://overpass-api.de/api/interpreter', {
-    method: 'POST',
-    body: `data=${encodeURIComponent(query)}`,
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-  })
+  const res = await fetch(url)
   if (!res.ok) throw new Error(`Overpass ${res.status}`)
 
   const json = await res.json()
