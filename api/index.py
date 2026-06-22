@@ -7,7 +7,7 @@ load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routes import blood, doctor, ambulance, auth, donor
+from api.routes import blood, doctor, ambulance, auth, donor, seed
 
 app = FastAPI(
     title="PranarakshaSeva API",
@@ -28,6 +28,7 @@ app.include_router(doctor.router, prefix="/api/doctor", tags=["Doctor"])
 app.include_router(ambulance.router, prefix="/api/ambulance", tags=["Ambulance"])
 app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
 app.include_router(donor.router, prefix="/api/donor", tags=["Donor"])
+app.include_router(seed.router, prefix="/api/seed", tags=["Seed"])
 
 
 @app.get("/api/health")
