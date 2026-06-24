@@ -5,27 +5,26 @@ import axios from 'axios'
 const CITIES = ['Bengaluru', 'Hyderabad', 'Mumbai', 'Delhi', 'Pune', 'Goa', 'Vizag']
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
 
-const inputCls = "w-full bg-zinc-900 border border-zinc-800 focus:border-red-500 rounded-xl px-4 py-3.5 text-white placeholder-zinc-600 focus:outline-none transition-colors text-[15px] appearance-none"
-const labelCls = "block text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em] mb-2"
+const inputCls = "w-full bg-zinc-900 border border-zinc-800 focus:border-red-500 rounded-xl px-4 py-3.5 text-white placeholder-zinc-600 focus:outline-none transition-colors text-[15px]"
+const labelCls = "block text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em] mb-3"
 
 export default function DonorRegister() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [blood, setBlood] = useState('')
+  const [city, setCity] = useState('Bengaluru')
+  const [name, setName] = useState('')
+  const [contact, setContact] = useState('')
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (!blood) { setError('Please select a blood type.'); return }
     setError('')
     setLoading(true)
     try {
-      await axios.post('/api/donor', {
-        name: e.target.name.value,
-        blood_type: e.target.blood_type.value,
-        city: e.target.city.value,
-        contact: e.target.contact.value,
-        available: true,
-      })
+      await axios.post('/api/donor', { name, blood_type: blood, city, contact, available: true })
       setSuccess(true)
     } catch {
       setError('Failed to register. Please try again.')
@@ -46,7 +45,7 @@ export default function DonorRegister() {
           </div>
           <h2 className="text-3xl font-black text-white mb-2">Thank You!</h2>
           <p className="text-zinc-400 text-sm mb-8 leading-relaxed max-w-xs mx-auto">
-            You're now registered as a blood donor. Your contribution can save up to 3 lives.
+            You're registered as a <span className="text-white font-semibold">{blood}</span> donor in <span className="text-white font-semibold">{city}</span>. Your donation can save up to 3 lives.
           </p>
           <button
             onClick={() => navigate('/')}
@@ -66,7 +65,7 @@ export default function DonorRegister() {
 
       <button
         onClick={() => navigate('/')}
-        className="text-zinc-600 hover:text-zinc-300 text-sm font-medium mb-12 self-start transition-colors flex items-center gap-1.5"
+        className="text-zinc-600 hover:text-zinc-300 text-sm font-medium mb-10 self-start transition-colors flex items-center gap-1.5"
       >
         ← Back
       </button>
@@ -80,37 +79,70 @@ export default function DonorRegister() {
         <h1 className="text-4xl font-black text-white mb-1">Donate<br />Blood</h1>
         <p className="text-zinc-500 text-sm mb-10">Your donation can save up to 3 lives.</p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-8">
           <div>
             <label className={labelCls}>Full Name</label>
-            <input name="name" type="text" required placeholder="Your full name" className={inputCls} />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelCls}>Blood Type</label>
-              <select name="blood_type" required className={inputCls}>
-                {BLOOD_TYPES.map((b) => <option key={b} value={b}>{b}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className={labelCls}>City</label>
-              <select name="city" required className={inputCls}>
-                {CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              type="text"
+              required
+              placeholder="Your full name"
+              className={inputCls}
+            />
           </div>
 
           <div>
             <label className={labelCls}>Phone Number</label>
             <input
-              name="contact"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
               type="tel"
               required
               pattern="[0-9]{10}"
               placeholder="10-digit mobile number"
               className={inputCls}
             />
+          </div>
+
+          <div>
+            <label className={labelCls}>Blood Type</label>
+            <div className="grid grid-cols-4 gap-2">
+              {BLOOD_TYPES.map((b) => (
+                <button
+                  key={b}
+                  type="button"
+                  onClick={() => setBlood(b)}
+                  className={`py-2.5 rounded-xl text-sm font-bold transition-all ${
+                    blood === b
+                      ? 'bg-red-600 text-white shadow-lg shadow-red-600/30'
+                      : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
+                  }`}
+                >
+                  {b}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className={labelCls}>City</label>
+            <div className="grid grid-cols-4 gap-2">
+              {CITIES.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setCity(c)}
+                  className={`py-2 rounded-xl text-xs font-semibold transition-all ${
+                    city === c
+                      ? 'bg-red-600 text-white shadow-lg shadow-red-600/30'
+                      : 'bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800'
+                  }`}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
           </div>
 
           {error && (
@@ -122,10 +154,10 @@ export default function DonorRegister() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-red-600 hover:bg-red-500 disabled:opacity-50 active:scale-[0.98] text-white font-bold py-[14px] rounded-2xl transition-all text-[15px] mt-2"
+            className="w-full bg-red-600 hover:bg-red-500 disabled:opacity-50 active:scale-[0.98] text-white font-bold py-[14px] rounded-2xl transition-all text-[15px]"
             style={{ boxShadow: loading ? 'none' : '0 8px 30px rgba(220,38,38,0.3)' }}
           >
-            {loading ? 'Registering...' : 'Register as Donor →'}
+            {loading ? 'Registering...' : `Register as ${blood || '?'} Donor in ${city} →`}
           </button>
         </form>
       </div>

@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import SOSButton from '../components/SOSButton'
-import LoadingSpinner from '../components/LoadingSpinner'
 
 const BloodIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -78,9 +77,8 @@ export default function GuestServices() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Dark header */}
-      <div className="bg-zinc-950 px-5 pt-10 pb-8">
+    <div className="min-h-screen bg-zinc-950 flex flex-col">
+      <div className="px-5 pt-10 pb-6">
         <button
           onClick={() => navigate('/guest')}
           className="text-zinc-600 hover:text-zinc-300 text-sm font-medium mb-6 flex items-center gap-1.5 transition-colors"
@@ -93,20 +91,19 @@ export default function GuestServices() {
         </h1>
         {blood && (
           <span className="inline-block mt-2 bg-red-600/20 text-red-400 text-xs font-semibold px-3 py-1 rounded-full border border-red-600/30">
-            {blood}
+            {blood} blood group
           </span>
         )}
       </div>
 
-      {/* Service list */}
-      <div className="flex-1 px-5 pt-4">
-        <div className="divide-y divide-gray-100">
+      <div className="flex-1 bg-zinc-900 rounded-t-3xl px-5 pt-5 pb-24">
+        <div className="divide-y divide-zinc-800">
           {SERVICES.map((s) => (
             <button
               key={s.id}
               onClick={() => fetchAndGo(s)}
               disabled={loading !== null}
-              className="w-full flex items-center gap-4 py-5 text-left hover:bg-gray-50 active:bg-gray-100 transition-colors disabled:opacity-60 rounded-xl -mx-1 px-1"
+              className="w-full flex items-center gap-4 py-4 text-left hover:bg-zinc-800/60 active:bg-zinc-800 transition-colors disabled:opacity-60 rounded-2xl px-3 -mx-3"
             >
               <div className={`${s.iconBg} w-12 h-12 rounded-2xl flex items-center justify-center text-white flex-shrink-0`}>
                 {loading === s.id ? (
@@ -116,21 +113,20 @@ export default function GuestServices() {
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-gray-900 text-[15px]">{s.title}</p>
-                <p className="text-gray-400 text-sm mt-0.5">{s.desc}</p>
+                <p className="font-bold text-white text-[15px]">{s.title}</p>
+                <p className="text-zinc-500 text-sm mt-0.5">{s.desc}</p>
               </div>
-              <svg className="w-4 h-4 text-gray-300 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <svg className="w-4 h-4 text-zinc-700 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" />
               </svg>
             </button>
           ))}
         </div>
 
-        {/* Secondary actions */}
-        <div className="mt-4 grid grid-cols-2 gap-3 pb-24">
+        <div className="mt-5 grid grid-cols-2 gap-3">
           <button
             onClick={() => navigate('/guest/map', { state: { city, blood } })}
-            className="bg-zinc-950 hover:bg-zinc-800 text-white rounded-2xl p-4 text-left transition-colors active:scale-[0.98]"
+            className="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700/50 text-white rounded-2xl p-4 text-left transition-colors active:scale-[0.98]"
           >
             <div className="w-9 h-9 bg-violet-600 rounded-xl flex items-center justify-center mb-3">
               <MapIcon />
@@ -140,7 +136,7 @@ export default function GuestServices() {
           </button>
           <button
             onClick={() => navigate('/donor/register')}
-            className="bg-zinc-950 hover:bg-zinc-800 text-white rounded-2xl p-4 text-left transition-colors active:scale-[0.98]"
+            className="bg-zinc-800 hover:bg-zinc-700 border border-zinc-700/50 text-white rounded-2xl p-4 text-left transition-colors active:scale-[0.98]"
           >
             <div className="w-9 h-9 bg-pink-600 rounded-xl flex items-center justify-center mb-3">
               <HeartIcon />
@@ -151,7 +147,7 @@ export default function GuestServices() {
         </div>
       </div>
 
-      <SOSButton />
+      <SOSButton city={city} />
     </div>
   )
 }

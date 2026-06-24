@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import SOSButton from '../components/SOSButton'
 import EmptyState from '../components/EmptyState'
@@ -5,6 +6,14 @@ import EmptyState from '../components/EmptyState'
 export default function DoctorResults() {
   const navigate = useNavigate()
   const { availabilities = [], city, blood } = useLocation().state ?? {}
+  const [copied, setCopied] = useState(null)
+
+  const copyNum = (num) => {
+    navigator.clipboard.writeText(num).then(() => {
+      setCopied(num)
+      setTimeout(() => setCopied(null), 1500)
+    })
+  }
 
   return (
     <div className="min-h-screen bg-zinc-950 flex flex-col">
@@ -49,12 +58,28 @@ export default function DoctorResults() {
                       <p className="text-zinc-500 text-sm mt-1">{a.hospital}</p>
                     </div>
                   </div>
-                  <a
-                    href={`tel:${a.contact}`}
-                    className="bg-green-600 hover:bg-green-500 active:scale-95 text-white font-bold px-4 py-2 rounded-xl text-sm transition-all flex-shrink-0"
-                  >
-                    Call
-                  </a>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => copyNum(a.contact)}
+                      className="text-zinc-600 hover:text-zinc-400 transition-colors p-1"
+                      title="Copy number"
+                    >
+                      {copied === a.contact ? (
+                        <span className="text-green-400 text-xs font-semibold">Copied!</span>
+                      ) : (
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                        </svg>
+                      )}
+                    </button>
+                    <a
+                      href={`tel:${a.contact}`}
+                      className="bg-green-600 hover:bg-green-500 active:scale-95 text-white font-bold px-4 py-2 rounded-xl text-sm transition-all"
+                    >
+                      Call
+                    </a>
+                  </div>
                 </div>
               </div>
             ))}
