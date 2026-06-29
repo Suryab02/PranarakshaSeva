@@ -1,6 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import SOSButton from '../components/SOSButton'
 import EmptyState from '../components/EmptyState'
+import { Link } from 'react-router-dom'
 
 export default function BloodResults() {
   const navigate = useNavigate()
@@ -33,10 +34,22 @@ export default function BloodResults() {
 
       <div className="flex-1 bg-zinc-900 rounded-t-3xl px-5 pt-5 pb-24">
         {availabilities.length === 0 ? (
-          <EmptyState
-            message="No blood banks found"
-            sub={`No ${blood ? blood + ' blood' : 'results'} available in ${city} right now.`}
-          />
+          <div>
+            <EmptyState
+              message="No blood banks found"
+              sub={`No ${blood ? blood + ' blood' : 'results'} available in ${city} right now.`}
+            />
+            <div className="text-center -mt-4 px-4">
+              <p className="text-zinc-600 text-sm mb-3">Someone in the community might help</p>
+              <Link
+                to="/guest/requests"
+                state={{ city, blood }}
+                className="inline-block bg-red-600/10 hover:bg-red-600/20 border border-red-600/30 text-red-400 font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors"
+              >
+                View Blood Requests in {city} →
+              </Link>
+            </div>
+          </div>
         ) : (
           <div className="space-y-3">
             {availabilities.map((a, i) => (

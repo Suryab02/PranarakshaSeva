@@ -9,6 +9,7 @@ import DoctorResults from './pages/DoctorResults'
 import AmbulanceResults from './pages/AmbulanceResults'
 import DonorRegister from './pages/DonorRegister'
 import MapView from './pages/MapView'
+import BloodRequests from './pages/BloodRequests'
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
         <Route path="/donor/register" element={<DonorRegister />} />
+        <Route path="/guest/requests" element={<BloodRequests />} />
       </Routes>
     </Router>
   )

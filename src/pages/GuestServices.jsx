@@ -28,6 +28,11 @@ const HeartIcon = () => (
     <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
   </svg>
 )
+const RequestIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 9h-2V5h2v6zm0 4h-2v-2h2v2z" />
+  </svg>
+)
 
 const SERVICES = [
   {
@@ -143,6 +148,21 @@ export default function GuestServices() {
             </div>
             <p className="font-bold text-sm">Donate Blood</p>
             <p className="text-zinc-500 text-xs mt-0.5">Register as donor</p>
+          </button>
+          <button
+            onClick={() => navigate('/guest/requests', { state: { city, blood } })}
+            className="col-span-2 bg-red-600/10 hover:bg-red-600/20 border border-red-600/30 text-white rounded-2xl p-4 text-left transition-colors active:scale-[0.98] flex items-center gap-4"
+          >
+            <div className="w-9 h-9 bg-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
+              <RequestIcon />
+            </div>
+            <div>
+              <p className="font-bold text-sm">Blood Requests</p>
+              <p className="text-zinc-500 text-xs mt-0.5">See who urgently needs blood · Post your own</p>
+            </div>
+            <svg className="w-4 h-4 text-zinc-600 ml-auto flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" />
+            </svg>
           </button>
         </div>
       </div>
