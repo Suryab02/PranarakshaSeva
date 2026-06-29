@@ -79,13 +79,32 @@ USERS = [
 ]
 
 
-@router.post("/run")
-async def run_seed(x_seed_key: str = Header(...)):
-    expected = os.environ.get("SEED_KEY", "")
-    if not expected or x_seed_key != expected:
-        raise HTTPException(status_code=403, detail="Invalid seed key")
-
+@router.get("/status")
+async def seed_status():
     db = get_db()
+    bloods = await db["bloods"].count_documents({})
+    doctors = await db["doctors"].count_documents({})
+    ambulances = await db["ambulances"].count_documents({})
+    return {
+        "seeded": bloods > 0,
+        "counts": {"bloods": bloods, "doctors": doctors, "ambulances": ambulances},
+        "hint": "POST /api/seed/run to seed" if bloods == 0 else "Pass x-seed-key header to re-seed",
+    }
+
+
+@router.post("/run")
+async def run_seed(x_seed_key: str = Header(default="")):
+    db = get_db()
+
+    # First-time setup: allow seeding without a key if DB is completely empty
+    existing = await db["bloods"].count_documents({})
+    if existing > 0:
+        expected = os.environ.get("SEED_KEY", "")
+        if not expected or x_seed_key != expected:
+            raise HTTPException(
+                status_code=403,
+                detail="Database already has data. Set SEED_KEY env var and pass it as x-seed-key header to re-seed.",
+            )
     await db["bloods"].delete_many({})
     await db["doctors"].delete_many({})
     await db["ambulances"].delete_many({})

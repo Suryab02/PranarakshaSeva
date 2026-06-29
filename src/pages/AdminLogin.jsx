@@ -88,6 +88,16 @@ export default function AdminLogin() {
             {loading ? 'Signing in...' : 'Sign In →'}
           </button>
         </form>
+
+        <div className="mt-8 pt-6 border-t border-zinc-900 text-center">
+          <p className="text-zinc-600 text-sm">New blood bank?</p>
+          <button
+            onClick={() => navigate('/admin/register')}
+            className="text-red-500 hover:text-red-400 font-semibold text-sm mt-1 transition-colors"
+          >
+            Register your blood bank →
+          </button>
+        </div>
       </div>
     </div>
   )

@@ -4,6 +4,14 @@ import axios from 'axios'
 
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
 
+function stockLevel(qty) {
+  if (qty === undefined) return null
+  if (qty === 0) return { label: 'Empty', cls: 'text-zinc-600' }
+  if (qty <= 3)  return { label: 'Critical', cls: 'text-red-400' }
+  if (qty <= 7)  return { label: 'Low', cls: 'text-yellow-400' }
+  return { label: 'Good', cls: 'text-green-400' }
+}
+
 export default function AdminDashboard() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -20,7 +28,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (!bankname) { navigate('/admin'); return }
-    axios.get(`/api/blood/inventory?bank=${bankname}`).then(({ data }) => {
+    axios.get(`/api/blood/inventory?bank=${encodeURIComponent(bankname)}`).then(({ data }) => {
       const map = {}
       data.forEach((item) => { map[item.name] = item.quantity })
       setInventory(map)
@@ -29,14 +37,12 @@ export default function AdminDashboard() {
   }, [bankname])
 
   const handleUpdate = async (name) => {
-    if (editing[name] === undefined) return
+    const val = parseInt(editing[name])
+    if (isNaN(val) || val < 0) return
     setSaving(name)
     try {
-      await axios.put(`/api/blood/inventory?bank=${bankname}`, {
-        name,
-        count: parseInt(editing[name]),
-      })
-      setInventory((prev) => ({ ...prev, [name]: parseInt(editing[name]) }))
+      await axios.put(`/api/blood/inventory?bank=${encodeURIComponent(bankname)}`, { name, count: val })
+      setInventory((prev) => ({ ...prev, [name]: val }))
       setEditing((prev) => { const n = { ...prev }; delete n[name]; return n })
     } finally {
       setSaving(null)
@@ -46,7 +52,7 @@ export default function AdminDashboard() {
   const handleDelete = async (name) => {
     setSaving(name + '_del')
     try {
-      await axios.delete(`/api/blood/inventory/${encodeURIComponent(name)}?bank=${bankname}`)
+      await axios.delete(`/api/blood/inventory/${encodeURIComponent(name)}?bank=${encodeURIComponent(bankname)}`)
       setInventory((prev) => { const n = { ...prev }; delete n[name]; return n })
     } finally {
       setSaving(null)
@@ -63,12 +69,11 @@ export default function AdminDashboard() {
   )
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      {/* Dark header */}
-      <div className="bg-zinc-950 px-5 pt-10 pb-8">
+    <div className="min-h-screen bg-zinc-950 flex flex-col">
+      <div className="px-5 pt-10 pb-6">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-zinc-600 text-xs font-bold uppercase tracking-widest mb-1">Blood Bank</p>
+            <p className="text-zinc-600 text-[10px] font-bold uppercase tracking-[0.2em] mb-1">Blood Bank</p>
             <h1 className="text-2xl font-black text-white leading-tight">{bankname}</h1>
             <p className="text-zinc-500 text-sm mt-0.5">Inventory Management</p>
           </div>
@@ -81,59 +86,59 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Inventory cards */}
-      <div className="flex-1 px-4 pt-4 pb-10">
-        <p className="text-gray-400 text-xs mb-4 px-1">
-          Tap a row to update quantity. Set to 0 or remove if unavailable.
+      <div className="flex-1 bg-zinc-900 rounded-t-3xl px-4 pt-5 pb-10">
+        <p className="text-zinc-600 text-xs mb-4 px-1">
+          Enter a quantity and tap Save. Tap Clear to remove a blood type from your inventory.
         </p>
-        <div className="space-y-2">
-          {BLOOD_TYPES.map((name) => (
-            <div
-              key={name}
-              className="border border-gray-100 rounded-2xl px-4 py-3.5 flex items-center gap-3"
-            >
-              {/* Blood type badge */}
-              <div className="bg-red-600 w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-black text-xs">{name}</span>
-              </div>
+        <div className="space-y-2.5">
+          {BLOOD_TYPES.map((name) => {
+            const level = stockLevel(inventory[name])
+            return (
+              <div key={name} className="bg-zinc-800 border border-zinc-700/50 rounded-2xl px-4 py-3.5 flex items-center gap-3">
+                <div className="bg-red-600 w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-black text-xs">{name}</span>
+                </div>
 
-              {/* Current qty */}
-              <div className="flex-1 min-w-0">
-                <p className="text-gray-500 text-xs mb-1">
-                  {inventory[name] !== undefined
-                    ? <span className="text-gray-800 font-bold">{inventory[name]} units</span>
-                    : <span className="text-gray-300">Not set</span>
-                  }
-                </p>
-                <input
-                  type="number"
-                  min="0"
-                  placeholder="Enter quantity"
-                  value={editing[name] ?? ''}
-                  onChange={(e) => setEditing((prev) => ({ ...prev, [name]: e.target.value }))}
-                  className="w-full border border-gray-200 focus:border-red-500 rounded-lg px-3 py-1.5 text-sm text-gray-800 focus:outline-none transition-colors"
-                />
-              </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    {inventory[name] !== undefined ? (
+                      <>
+                        <span className="text-white font-bold text-sm">{inventory[name]} units</span>
+                        {level && <span className={`text-[10px] font-bold uppercase tracking-wide ${level.cls}`}>{level.label}</span>}
+                      </>
+                    ) : (
+                      <span className="text-zinc-600 text-sm">Not in inventory</span>
+                    )}
+                  </div>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="Set quantity"
+                    value={editing[name] ?? ''}
+                    onChange={(e) => setEditing((prev) => ({ ...prev, [name]: e.target.value }))}
+                    className="w-full bg-zinc-900 border border-zinc-700 focus:border-red-500 rounded-lg px-3 py-1.5 text-sm text-white placeholder-zinc-600 focus:outline-none transition-colors"
+                  />
+                </div>
 
-              {/* Actions */}
-              <div className="flex flex-col gap-1.5 flex-shrink-0">
-                <button
-                  onClick={() => handleUpdate(name)}
-                  disabled={editing[name] === undefined || saving === name}
-                  className="bg-emerald-500 hover:bg-emerald-600 disabled:opacity-30 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors w-16 text-center"
-                >
-                  {saving === name ? '...' : 'Save'}
-                </button>
-                <button
-                  onClick={() => handleDelete(name)}
-                  disabled={inventory[name] === undefined || saving === name + '_del'}
-                  className="bg-gray-100 hover:bg-red-500 hover:text-white disabled:opacity-30 text-gray-500 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors w-16 text-center"
-                >
-                  {saving === name + '_del' ? '...' : 'Clear'}
-                </button>
+                <div className="flex flex-col gap-1.5 flex-shrink-0">
+                  <button
+                    onClick={() => handleUpdate(name)}
+                    disabled={editing[name] === undefined || editing[name] === '' || saving === name}
+                    className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-30 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors w-16 text-center"
+                  >
+                    {saving === name ? '...' : 'Save'}
+                  </button>
+                  <button
+                    onClick={() => handleDelete(name)}
+                    disabled={inventory[name] === undefined || saving === name + '_del'}
+                    className="bg-zinc-700 hover:bg-red-600 disabled:opacity-30 text-zinc-400 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors w-16 text-center"
+                  >
+                    {saving === name + '_del' ? '...' : 'Clear'}
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </div>
