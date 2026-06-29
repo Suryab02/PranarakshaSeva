@@ -16,9 +16,18 @@ app = FastAPI(
     redirect_slashes=False,
 )
 
+# Lock CORS to known origins. Set ALLOWED_ORIGINS (comma-separated) in prod.
+# On Vercel the SPA and API share an origin, so CORS only matters for local dev.
+_origins_env = os.environ.get("ALLOWED_ORIGINS", "").strip()
+_allowed_origins = (
+    [o.strip() for o in _origins_env.split(",") if o.strip()]
+    if _origins_env
+    else ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5173"]
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_allowed_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Header, HTTPException
 from api.database import get_db
+from api.security import hash_password
 import os
 
 router = APIRouter()
@@ -116,7 +117,7 @@ async def run_seed(x_seed_key: str = Header(default="")):
     for u in USERS:
         existing = await db["users"].find_one({"username": u["username"]})
         if not existing:
-            await db["users"].insert_one(u)
+            await db["users"].insert_one({**u, "password": hash_password(u["password"])})
 
     return {
         "status": "seeded",

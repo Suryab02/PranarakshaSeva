@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, Link } from 'react-router-dom'
 import SOSButton from '../components/SOSButton'
 import EmptyState from '../components/EmptyState'
 
-export default function AmbulanceResults() {
+export default function DonorResults() {
   const navigate = useNavigate()
   const { availabilities = [], city, blood } = useLocation().state ?? {}
   const [copied, setCopied] = useState(null)
@@ -26,41 +26,54 @@ export default function AmbulanceResults() {
         </button>
         <div className="flex items-end justify-between">
           <div>
-            <h1 className="text-3xl font-black text-white">Ambulance</h1>
-            <p className="text-zinc-400 text-sm mt-1">{city} · 24/7 Emergency</p>
+            <h1 className="text-3xl font-black text-white">Blood Donors</h1>
+            <div className="flex items-center gap-2 mt-1.5">
+              <span className="text-zinc-400 text-sm">{city}</span>
+              {blood && (
+                <span className="bg-rose-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">{blood}</span>
+              )}
+            </div>
           </div>
           {availabilities.length > 0 && (
-            <span className="text-zinc-500 text-sm font-medium mb-0.5">{availabilities.length} found</span>
+            <span className="text-zinc-500 text-sm font-medium mb-0.5">{availabilities.length} available</span>
           )}
         </div>
       </div>
 
       <div className="flex-1 bg-zinc-900 rounded-t-3xl px-5 pt-5 pb-24">
         {availabilities.length === 0 ? (
-          <EmptyState
-            message="No ambulances listed"
-            sub={`No ambulance services found in ${city}.`}
-          />
+          <div>
+            <EmptyState
+              message="No donors available"
+              sub={`No ${blood ? blood + ' ' : ''}donors are registered in ${city} right now.`}
+            />
+            <div className="text-center -mt-4">
+              <Link
+                to="/donor/register"
+                className="inline-block bg-rose-600/10 hover:bg-rose-600/20 border border-rose-600/30 text-rose-400 font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors"
+              >
+                Become a donor →
+              </Link>
+            </div>
+          </div>
         ) : (
           <div className="space-y-3">
-            {availabilities.map((a, i) => (
+            {availabilities.map((d, i) => (
               <div key={i} className="bg-zinc-800 border border-zinc-700/50 rounded-2xl p-4 flex items-center gap-4">
-                <div className="bg-orange-600 w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0">
-                  <svg viewBox="0 0 24 24" fill="white" className="w-6 h-6">
-                    <path d="M19 3H5C3.9 3 3 3.9 3 5v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c.55 0 1 .45 1 1v2h2c.55 0 1 .45 1 1s-.45 1-1 1h-2v2c0 .55-.45 1-1 1s-1-.45-1-1v-2H9c-.55 0-1-.45-1-1s.45-1 1-1h2V7c0-.55.45-1 1-1z" />
-                  </svg>
+                <div className="bg-rose-600 w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0">
+                  <span className="text-white font-black text-sm">{d.blood_type}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-white">{a.hospital}</p>
-                  <p className="text-zinc-500 text-sm mt-0.5">{a.city}</p>
+                  <p className="font-bold text-white truncate">{d.name}</p>
+                  <p className="text-zinc-500 text-sm mt-0.5">{d.city}</p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <button
-                    onClick={() => copyNum(a.contact)}
+                    onClick={() => copyNum(d.contact)}
                     className="text-zinc-600 hover:text-zinc-400 transition-colors p-1"
                     title="Copy number"
                   >
-                    {copied === a.contact ? (
+                    {copied === d.contact ? (
                       <span className="text-green-400 text-xs font-semibold">Copied!</span>
                     ) : (
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4">
@@ -70,14 +83,17 @@ export default function AmbulanceResults() {
                     )}
                   </button>
                   <a
-                    href={`tel:${a.contact}`}
-                    className="bg-red-600 hover:bg-red-500 active:scale-95 text-white font-bold px-4 py-2 rounded-xl text-sm transition-all font-mono"
+                    href={`tel:${d.contact}`}
+                    className="bg-green-600 hover:bg-green-500 active:scale-95 text-white font-bold px-4 py-2 rounded-xl text-sm transition-all"
                   >
-                    {a.contact}
+                    Call
                   </a>
                 </div>
               </div>
             ))}
+            <p className="text-center text-zinc-700 text-xs pt-2">
+              Please call respectfully — donors are volunteers.
+            </p>
           </div>
         )}
       </div>

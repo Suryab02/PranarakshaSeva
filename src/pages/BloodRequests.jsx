@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import SOSButton from '../components/SOSButton'
 import EmptyState from '../components/EmptyState'
+import { useToast } from '../toast'
 
 const CITIES = ['Bengaluru', 'Hyderabad', 'Mumbai', 'Delhi', 'Pune', 'Goa', 'Vizag']
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
@@ -73,6 +74,7 @@ function RequestCard({ req }) {
 }
 
 function PostForm({ defaultCity, defaultBlood, onSuccess }) {
+  const toast = useToast()
   const [name, setName] = useState('')
   const [contact, setContact] = useState('')
   const [blood, setBlood] = useState(defaultBlood || '')
@@ -89,6 +91,7 @@ function PostForm({ defaultCity, defaultBlood, onSuccess }) {
     setLoading(true)
     try {
       await axios.post('/api/request', { name, contact, blood_type: blood, city, urgency, message })
+      toast(`Request posted — ${blood} in ${city}`)
       onSuccess({ blood, city })
     } catch (err) {
       const detail = err.response?.data?.detail
@@ -222,7 +225,7 @@ export default function BloodRequests() {
 
   if (posted) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center px-6 text-center">
+      <div className="min-h-screen lg:min-h-full bg-zinc-950 flex flex-col items-center justify-center px-6 text-center">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-64 bg-red-900/15 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 max-w-xs">
           <div className="w-16 h-16 bg-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
@@ -253,7 +256,7 @@ export default function BloodRequests() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col">
+    <div className="min-h-screen lg:min-h-full bg-zinc-950 flex flex-col">
       <div className="px-5 pt-10 pb-6">
         <button
           onClick={() => navigate('/guest/info', { state: { city, blood } })}

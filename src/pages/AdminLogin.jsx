@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { saveSession } from '../lib/auth'
 
 export default function AdminLogin() {
   const navigate = useNavigate()
@@ -16,6 +17,7 @@ export default function AdminLogin() {
         username: e.target.username.value,
         password: e.target.password.value,
       })
+      saveSession({ token: data.token, bankname: data.bankname })
       navigate('/admin/dashboard', { state: { bankname: data.bankname } })
     } catch {
       setError('Invalid username or password')
@@ -25,7 +27,7 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col px-6 pt-10 pb-12 relative overflow-hidden">
+    <div className="min-h-screen lg:min-h-full bg-zinc-950 flex flex-col px-6 pt-10 pb-12 relative overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-64 bg-red-900/10 rounded-full blur-3xl pointer-events-none" />
 
       <button

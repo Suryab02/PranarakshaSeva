@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import SOSButton from '../components/SOSButton'
+import { useToast } from '../toast'
 
 const BloodIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -62,27 +63,43 @@ const SERVICES = [
     path: 'ambulance',
     navPath: '/guest/ambulance',
   },
+  {
+    id: 'donor',
+    Icon: HeartIcon,
+    iconBg: 'bg-rose-600',
+    title: 'Blood Donors',
+    desc: 'Registered volunteer donors near you',
+    path: 'donor',
+    navPath: '/guest/donor',
+  },
 ]
+
+// Services that also filter by the selected blood group.
+const BLOOD_AWARE = new Set(['blood', 'donor'])
 
 export default function GuestServices() {
   const { city, blood } = useLocation().state ?? {}
   const navigate = useNavigate()
+  const toast = useToast()
   const [loading, setLoading] = useState(null)
 
   const fetchAndGo = async ({ id, path, navPath }) => {
+    if (!city) { toast('Please pick a city first.', 'error'); navigate('/guest'); return }
     setLoading(id)
     try {
-      let url = `/api/${path}?city=${city}`
-      if (id === 'blood' && blood) url += `&blood=${blood}`
-      const { data } = await axios.get(url)
+      const params = new URLSearchParams({ city })
+      if (blood && BLOOD_AWARE.has(id)) params.set('blood', blood)
+      const { data } = await axios.get(`/api/${path}?${params}`)
       navigate(navPath, { state: { availabilities: data, city, blood } })
+    } catch {
+      toast('Could not load results. Check your connection and try again.', 'error')
     } finally {
       setLoading(null)
     }
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col">
+    <div className="min-h-screen lg:min-h-full bg-zinc-950 flex flex-col">
       <div className="px-5 pt-10 pb-6">
         <button
           onClick={() => navigate('/guest')}

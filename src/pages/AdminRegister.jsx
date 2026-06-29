@@ -38,7 +38,7 @@ export default function AdminRegister() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center px-6 text-center">
+      <div className="min-h-screen lg:min-h-full bg-zinc-950 flex flex-col items-center justify-center px-6 text-center">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-64 bg-red-900/15 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 max-w-xs">
           <div className="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
@@ -63,7 +63,7 @@ export default function AdminRegister() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col px-6 pt-10 pb-12 relative overflow-hidden">
+    <div className="min-h-screen lg:min-h-full bg-zinc-950 flex flex-col px-6 pt-10 pb-12 relative overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-64 bg-red-900/10 rounded-full blur-3xl pointer-events-none" />
 
       <button

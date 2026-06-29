@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Query, HTTPException
+from fastapi import APIRouter, Query, Depends
 from pymongo import ReturnDocument
 from api.database import get_db
 from api.models import BloodCreate, BloodUpdate
+from api.deps import require_admin
 
 router = APIRouter()
 
@@ -29,18 +30,19 @@ async def add_blood(body: BloodCreate):
     return serialize(doc)
 
 
+# ── inventory: admin-only, scoped to the authenticated bank ──────────────────
 @router.get("/inventory")
-async def get_inventory(bank: str = Query(...)):
+async def get_inventory(admin: dict = Depends(require_admin)):
     db = get_db()
-    docs = await db["bloods"].find({"bankname": bank}).to_list(100)
+    docs = await db["bloods"].find({"bankname": admin["bank"]}).to_list(100)
     return [serialize(d) for d in docs]
 
 
 @router.put("/inventory")
-async def update_inventory(body: BloodUpdate, bank: str = Query(...)):
+async def update_inventory(body: BloodUpdate, admin: dict = Depends(require_admin)):
     db = get_db()
     result = await db["bloods"].find_one_and_update(
-        {"bankname": bank, "name": body.name},
+        {"bankname": admin["bank"], "name": body.name},
         {"$set": {"quantity": body.count}},
         upsert=True,
         return_document=ReturnDocument.AFTER,
@@ -49,7 +51,7 @@ async def update_inventory(body: BloodUpdate, bank: str = Query(...)):
 
 
 @router.delete("/inventory/{name}")
-async def delete_inventory(name: str, bank: str = Query(...)):
+async def delete_inventory(name: str, admin: dict = Depends(require_admin)):
     db = get_db()
-    await db["bloods"].find_one_and_delete({"bankname": bank, "name": name})
+    await db["bloods"].find_one_and_delete({"bankname": admin["bank"], "name": name})
     return {"success": True}

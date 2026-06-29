@@ -16,7 +16,7 @@ export default function Login() {
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center px-6 relative overflow-hidden">
+    <div className="min-h-screen lg:min-h-full bg-zinc-950 flex flex-col items-center justify-center px-6 relative overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-red-700/15 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-64 h-64 bg-red-900/10 rounded-full blur-3xl pointer-events-none" />
 

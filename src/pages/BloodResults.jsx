@@ -1,14 +1,26 @@
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useState, useMemo } from 'react'
+import { useLocation, useNavigate, Link } from 'react-router-dom'
 import SOSButton from '../components/SOSButton'
 import EmptyState from '../components/EmptyState'
-import { Link } from 'react-router-dom'
+
+const SORTS = {
+  units: { label: 'Most units', fn: (a, b) => (b.quantity ?? 0) - (a.quantity ?? 0) },
+  bank: { label: 'Bank A–Z', fn: (a, b) => (a.bankname || '').localeCompare(b.bankname || '') },
+  type: { label: 'Blood type', fn: (a, b) => (a.name || '').localeCompare(b.name || '') },
+}
 
 export default function BloodResults() {
   const navigate = useNavigate()
   const { availabilities = [], city, blood } = useLocation().state ?? {}
+  const [sort, setSort] = useState('units')
+
+  const sorted = useMemo(
+    () => [...availabilities].sort(SORTS[sort].fn),
+    [availabilities, sort]
+  )
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col">
+    <div className="min-h-screen lg:min-h-full bg-zinc-950 flex flex-col">
       <div className="px-5 pt-10 pb-6">
         <button
           onClick={() => navigate('/guest/info', { state: { city, blood } })}
@@ -52,7 +64,23 @@ export default function BloodResults() {
           </div>
         ) : (
           <div className="space-y-3">
-            {availabilities.map((a, i) => (
+            <div className="flex items-center gap-2 overflow-x-auto no-scrollbar -mx-1 px-1 pb-1">
+              <span className="text-zinc-600 text-xs font-semibold flex-shrink-0">Sort</span>
+              {Object.entries(SORTS).map(([key, { label }]) => (
+                <button
+                  key={key}
+                  onClick={() => setSort(key)}
+                  className={`flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full transition-colors ${
+                    sort === key
+                      ? 'bg-red-600 text-white'
+                      : 'bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-zinc-700/50'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {sorted.map((a, i) => (
               <div key={i} className="bg-zinc-800 border border-zinc-700/50 rounded-2xl p-4 flex items-center gap-4">
                 <div className="bg-red-600 w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0">
                   <span className="text-white font-black text-sm">{a.name}</span>

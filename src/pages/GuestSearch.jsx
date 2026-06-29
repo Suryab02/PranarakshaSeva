@@ -15,7 +15,7 @@ export default function GuestSearch() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col px-6 pt-10 pb-12 relative overflow-hidden">
+    <div className="min-h-screen lg:min-h-full bg-zinc-950 flex flex-col px-6 pt-10 pb-12 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-72 h-72 bg-red-900/10 rounded-full blur-3xl pointer-events-none" />
 
       <button

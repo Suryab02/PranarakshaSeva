@@ -16,7 +16,7 @@ export default function DoctorResults() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col">
+    <div className="min-h-screen lg:min-h-full bg-zinc-950 flex flex-col">
       <div className="px-5 pt-10 pb-6">
         <button
           onClick={() => navigate('/guest/info', { state: { city, blood } })}

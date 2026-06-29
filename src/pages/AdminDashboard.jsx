@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { getSession, clearSession, authHeader } from '../lib/auth'
+import { useToast } from '../toast'
+import Skeleton from '../components/Skeleton'
 
 const BLOOD_TYPES = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
 
@@ -15,35 +18,56 @@ function stockLevel(qty) {
 export default function AdminDashboard() {
   const location = useLocation()
   const navigate = useNavigate()
-  const banknameFromState = location.state?.bankname
-  const bankname = banknameFromState ?? localStorage.getItem('bankname') ?? null
+  const toast = useToast()
+  const session = getSession()
+  const bankname = location.state?.bankname ?? session?.bankname ?? null
   const [inventory, setInventory] = useState({})
   const [editing, setEditing] = useState({})
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [saving, setSaving] = useState(null)
 
-  useEffect(() => {
-    if (banknameFromState) localStorage.setItem('bankname', banknameFromState)
-  }, [banknameFromState])
+  const handleAuthError = (err) => {
+    if (err?.response?.status === 401) {
+      clearSession()
+      navigate('/admin')
+      return true
+    }
+    return false
+  }
 
   useEffect(() => {
-    if (!bankname) { navigate('/admin'); return }
-    axios.get(`/api/blood/inventory?bank=${encodeURIComponent(bankname)}`).then(({ data }) => {
-      const map = {}
-      data.forEach((item) => { map[item.name] = item.quantity })
-      setInventory(map)
-      setLoading(false)
-    })
-  }, [bankname])
+    if (!session) { navigate('/admin'); return }
+    let active = true
+    setLoading(true)
+    setError('')
+    axios
+      .get('/api/blood/inventory', { headers: authHeader() })
+      .then(({ data }) => {
+        if (!active) return
+        const map = {}
+        data.forEach((item) => { map[item.name] = item.quantity })
+        setInventory(map)
+      })
+      .catch((err) => {
+        if (!active || handleAuthError(err)) return
+        setError('Could not load your inventory. Check your connection and try again.')
+      })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
+  }, [])
 
   const handleUpdate = async (name) => {
     const val = parseInt(editing[name])
     if (isNaN(val) || val < 0) return
     setSaving(name)
     try {
-      await axios.put(`/api/blood/inventory?bank=${encodeURIComponent(bankname)}`, { name, count: val })
+      await axios.put('/api/blood/inventory', { name, count: val }, { headers: authHeader() })
       setInventory((prev) => ({ ...prev, [name]: val }))
       setEditing((prev) => { const n = { ...prev }; delete n[name]; return n })
+      toast(`${name} set to ${val} units`)
+    } catch (err) {
+      if (!handleAuthError(err)) toast(`Couldn't update ${name}. Try again.`, 'error')
     } finally {
       setSaving(null)
     }
@@ -52,24 +76,18 @@ export default function AdminDashboard() {
   const handleDelete = async (name) => {
     setSaving(name + '_del')
     try {
-      await axios.delete(`/api/blood/inventory/${encodeURIComponent(name)}?bank=${encodeURIComponent(bankname)}`)
+      await axios.delete(`/api/blood/inventory/${encodeURIComponent(name)}`, { headers: authHeader() })
       setInventory((prev) => { const n = { ...prev }; delete n[name]; return n })
+      toast(`${name} removed from inventory`, 'info')
+    } catch (err) {
+      if (!handleAuthError(err)) toast(`Couldn't remove ${name}. Try again.`, 'error')
     } finally {
       setSaving(null)
     }
   }
 
-  if (loading) return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-      <div className="text-center">
-        <div className="w-8 h-8 border-2 border-red-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-zinc-500 text-sm">Loading inventory...</p>
-      </div>
-    </div>
-  )
-
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col">
+    <div className="min-h-screen lg:min-h-full bg-zinc-950 flex flex-col">
       <div className="px-5 pt-10 pb-6">
         <div className="flex items-start justify-between">
           <div>
@@ -78,7 +96,7 @@ export default function AdminDashboard() {
             <p className="text-zinc-500 text-sm mt-0.5">Inventory Management</p>
           </div>
           <button
-            onClick={() => { localStorage.removeItem('bankname'); navigate('/') }}
+            onClick={() => { clearSession(); navigate('/') }}
             className="border border-zinc-800 hover:border-zinc-600 text-zinc-500 hover:text-zinc-300 text-sm font-medium px-4 py-2 rounded-xl transition-colors mt-1"
           >
             Sign Out
@@ -90,6 +108,22 @@ export default function AdminDashboard() {
         <p className="text-zinc-600 text-xs mb-4 px-1">
           Enter a quantity and tap Save. Tap Clear to remove a blood type from your inventory.
         </p>
+
+        {error && (
+          <div className="bg-red-600/10 border border-red-600/30 text-red-400 text-sm rounded-xl px-4 py-3 mb-4 flex items-center justify-between gap-3">
+            <span>{error}</span>
+            <button
+              onClick={() => window.location.reload()}
+              className="text-red-300 hover:text-white font-semibold flex-shrink-0 underline"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {loading ? (
+          <Skeleton rows={8} />
+        ) : (
         <div className="space-y-2.5">
           {BLOOD_TYPES.map((name) => {
             const level = stockLevel(inventory[name])
@@ -140,6 +174,7 @@ export default function AdminDashboard() {
             )
           })}
         </div>
+        )}
       </div>
     </div>
   )

@@ -85,14 +85,14 @@ export default function MapView() {
   }, [city])
 
   if (loading) return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center gap-3">
+    <div className="min-h-screen lg:min-h-full bg-zinc-950 flex flex-col items-center justify-center gap-3">
       <div className="w-8 h-8 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
       <p className="text-zinc-500 text-sm">Fetching live map data…</p>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen lg:min-h-full bg-white flex flex-col">
       <div className="bg-zinc-950 px-5 pt-10 pb-6">
         <button
           onClick={() => navigate('/guest/info', { state: { city, blood } })}

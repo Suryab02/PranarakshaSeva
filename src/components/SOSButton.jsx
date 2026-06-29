@@ -23,7 +23,7 @@ export default function SOSButton({ city }) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-red-600 text-white rounded-full flex items-center justify-center text-[11px] font-black tracking-wider ring-pulse shadow-xl shadow-red-600/50 hover:bg-red-500 transition-colors"
+        className="fixed lg:absolute bottom-6 right-6 z-50 w-14 h-14 bg-red-600 text-white rounded-full flex items-center justify-center text-[11px] font-black tracking-wider ring-pulse shadow-xl shadow-red-600/50 hover:bg-red-500 transition-colors"
         title="Emergency SOS"
       >
         SOS
