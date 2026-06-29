@@ -30,12 +30,18 @@ export default function AdminLogin() {
 
       <button
         onClick={() => navigate('/')}
-        className="text-zinc-600 hover:text-zinc-300 text-sm font-medium mb-12 self-start transition-colors flex items-center gap-1.5"
+        className="text-zinc-600 hover:text-zinc-300 text-sm font-medium mb-8 self-start transition-colors flex items-center gap-1.5"
       >
         ← Back
       </button>
 
       <div className="relative z-10 flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
+        <div className="w-12 h-12 bg-zinc-800 border border-zinc-700 rounded-2xl flex items-center justify-center mb-6">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" className="w-6 h-6">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+            <path strokeLinecap="round" d="M7 11V7a5 5 0 0110 0v4" />
+          </svg>
+        </div>
         <h1 className="text-4xl font-black text-white mb-1">Admin<br />Portal</h1>
         <p className="text-zinc-500 text-sm mb-10">Sign in to manage your blood bank inventory.</p>
 

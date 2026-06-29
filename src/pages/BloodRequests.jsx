@@ -19,7 +19,14 @@ function timeAgo(iso) {
 }
 
 function RequestCard({ req }) {
-  const [revealed, setRevealed] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const copyNum = () => {
+    navigator.clipboard.writeText(req.contact).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    })
+  }
 
   return (
     <div className={`bg-zinc-800 border rounded-2xl p-4 ${req.urgency === 'critical' ? 'border-red-600/50' : 'border-zinc-700/50'}`}>
@@ -44,28 +51,22 @@ function RequestCard({ req }) {
         <p className="text-zinc-400 text-sm mt-2 leading-relaxed italic">"{req.message}"</p>
       )}
 
-      <div className="mt-3 pt-3 border-t border-zinc-700/50 flex items-center justify-between">
-        <div>
-          <p className="text-zinc-600 text-xs mb-0.5">Contact</p>
-          <p className="text-white font-mono text-sm font-semibold">
-            {revealed ? req.contact_masked.replace('XXXXXX', req._full ?? 'XXXXXX') : req.contact_masked}
-          </p>
-        </div>
-        {!revealed ? (
-          <button
-            onClick={() => setRevealed(true)}
-            className="bg-zinc-700 hover:bg-zinc-600 text-zinc-300 text-sm font-semibold px-3 py-1.5 rounded-xl transition-colors"
-          >
-            Reveal
+      <div className="mt-3 pt-3 border-t border-zinc-700/50 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <p className="text-white font-mono text-sm font-semibold">{req.contact}</p>
+          <button onClick={copyNum} className="text-zinc-600 hover:text-zinc-400 transition-colors flex-shrink-0">
+            {copied
+              ? <span className="text-green-400 text-xs font-semibold">Copied!</span>
+              : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            }
           </button>
-        ) : (
-          <a
-            href={`tel:${req.contact_masked}`}
-            className="bg-green-600 hover:bg-green-500 text-white text-sm font-bold px-4 py-1.5 rounded-xl transition-colors"
-          >
-            Call
-          </a>
-        )}
+        </div>
+        <a
+          href={`tel:${req.contact}`}
+          className="bg-green-600 hover:bg-green-500 text-white text-sm font-bold px-4 py-1.5 rounded-xl transition-colors flex-shrink-0"
+        >
+          Call
+        </a>
       </div>
     </div>
   )
@@ -264,7 +265,7 @@ export default function BloodRequests() {
           <div>
             <h1 className="text-3xl font-black text-white">Blood Requests</h1>
             <div className="flex items-center gap-2 mt-1.5">
-              <span className="text-zinc-400 text-sm">{city}</span>
+              <span className="text-zinc-400 text-sm">{city || 'All cities'}</span>
               {blood && (
                 <span className="bg-red-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">{blood}</span>
               )}
@@ -299,7 +300,7 @@ export default function BloodRequests() {
             <div>
               <EmptyState
                 message="No open requests"
-                sub={`No one has posted a blood request in ${city}${blood ? ` for ${blood}` : ''} yet.`}
+                sub={`No one has posted a ${blood ? blood + ' blood' : 'blood'} request in ${city || 'this city'} yet.`}
               />
               <div className="text-center mt-2">
                 <button

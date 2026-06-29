@@ -157,7 +157,7 @@ export default function DonorRegister() {
             className="w-full bg-red-600 hover:bg-red-500 disabled:opacity-50 active:scale-[0.98] text-white font-bold py-[14px] rounded-2xl transition-all text-[15px]"
             style={{ boxShadow: loading ? 'none' : '0 8px 30px rgba(220,38,38,0.3)' }}
           >
-            {loading ? 'Registering...' : `Register as ${blood || '?'} Donor in ${city} →`}
+            {loading ? 'Registering...' : blood ? `Register as ${blood} Donor in ${city} →` : 'Select a blood type above'}
           </button>
         </form>
       </div>

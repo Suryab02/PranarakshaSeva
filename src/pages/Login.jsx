@@ -26,7 +26,7 @@ export default function Login() {
             <div className="absolute inset-0 scale-[2] bg-red-600/10 rounded-full blur-2xl" />
             <BloodDrop />
           </div>
-          <h1 className="text-[2.75rem] font-black text-white tracking-tight leading-none text-center">
+          <h1 className="text-[2.1rem] font-black text-white tracking-tight leading-none text-center">
             Pranaraksha<span className="text-red-500">Seva</span>
           </h1>
           <p className="text-zinc-600 text-[11px] tracking-[0.25em] uppercase mt-2.5">

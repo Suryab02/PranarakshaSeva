@@ -90,11 +90,7 @@ async def list_requests(
     cursor = db['requests'].find(query, {'_id': 0}).sort('created_at', -1).limit(50)
     docs = await cursor.to_list(50)
 
-    # Mask contact — last 4 digits only; full number stored but never returned in list
     for d in docs:
-        full = d.get('contact', '')
-        d['contact_masked'] = 'XXXXXX' + full[-4:]
-        del d['contact']                        # never expose in list response
         if isinstance(d.get('created_at'), datetime):
             d['created_at'] = d['created_at'].isoformat()
 

@@ -92,7 +92,7 @@ export default function GuestServices() {
         </button>
         <h1 className="text-3xl font-black text-white leading-tight">
           Services in<br />
-          <span className="text-red-500">{city}</span>
+          <span className="text-red-500">{city || 'your city'}</span>
         </h1>
         {blood && (
           <span className="inline-block mt-2 bg-red-600/20 text-red-400 text-xs font-semibold px-3 py-1 rounded-full border border-red-600/30">
@@ -158,7 +158,7 @@ export default function GuestServices() {
             </div>
             <div>
               <p className="font-bold text-sm">Blood Requests</p>
-              <p className="text-zinc-500 text-xs mt-0.5">See who urgently needs blood · Post your own</p>
+              <p className="text-zinc-500 text-xs mt-0.5">Need blood urgently? Post a request</p>
             </div>
             <svg className="w-4 h-4 text-zinc-600 ml-auto flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" />
