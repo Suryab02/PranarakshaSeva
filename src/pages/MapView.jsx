@@ -278,15 +278,26 @@ export default function MapView() {
 
           <MapClickHandler onClose={closeSheet} />
 
-          {/* blood bank pins — jittered around city center (no real coords stored) */}
-          {filters.blood && bloodBanks.map((b, i) => (
-            <Marker
-              key={`b-${i}`}
-              position={[center[0] + jitter(i), center[1] + jitter(i + 3)]}
-              icon={ICONS.blood}
-              eventHandlers={{ click: () => setSelected({ ...b, kind: 'blood', displayName: b.bankname }) }}
-            />
-          ))}
+          {/* blood bank pins — real coords when the bank has them, jittered as a fallback.
+              A bank's blood types share one coordinate, so duplicates get a tiny
+              offset (~25m) to keep every pin visible and clickable. */}
+          {filters.blood && bloodBanks.map((b, i) => {
+            const hasCoords = b.lat != null && b.lng != null
+            const dupIndex = hasCoords
+              ? bloodBanks.slice(0, i).filter((x) => x.lat === b.lat && x.lng === b.lng).length
+              : 0
+            const position = hasCoords
+              ? [b.lat + dupIndex * 0.00025, b.lng + dupIndex * 0.00025]
+              : [center[0] + jitter(i), center[1] + jitter(i + 3)]
+            return (
+              <Marker
+                key={`b-${i}`}
+                position={position}
+                icon={ICONS.blood}
+                eventHandlers={{ click: () => setSelected({ ...b, kind: 'blood', displayName: b.bankname }) }}
+              />
+            )
+          })}
 
           {/* doctor/clinic pins */}
           {filters.doctor && doctors.map((d) => (

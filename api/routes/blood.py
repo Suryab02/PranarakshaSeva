@@ -22,6 +22,23 @@ async def get_blood(city: str = Query(...), blood: str = Query(None)):
     return [serialize(d) for d in docs]
 
 
+# ── fallback suggestions when a city has no stock for a blood type ───────────
+@router.get("/nearby")
+async def get_nearby(blood: str = Query(...), exclude: str = Query(None)):
+    db = get_db()
+    query = {"name": blood, "quantity": {"$gt": 0}}
+    if exclude:
+        query["city"] = {"$ne": exclude}
+    docs = await db["bloods"].find(query).to_list(200)
+    totals = {}
+    for d in docs:
+        totals[d["city"]] = totals.get(d["city"], 0) + d["quantity"]
+    return sorted(
+        ({"city": c, "units": u} for c, u in totals.items()),
+        key=lambda x: -x["units"],
+    )
+
+
 @router.post("", status_code=201)
 async def add_blood(body: BloodCreate):
     db = get_db()

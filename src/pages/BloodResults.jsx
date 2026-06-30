@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useLocation, useNavigate, Link } from 'react-router-dom'
+import axios from 'axios'
 import SOSButton from '../components/SOSButton'
 import EmptyState from '../components/EmptyState'
 
@@ -11,13 +12,37 @@ const SORTS = {
 
 export default function BloodResults() {
   const navigate = useNavigate()
-  const { availabilities = [], city, blood } = useLocation().state ?? {}
+  const location = useLocation()
+  const { availabilities = [], city, blood } = location.state ?? {}
   const [sort, setSort] = useState('units')
+  const [nearby, setNearby] = useState([])
+  const [nearbyLoading, setNearbyLoading] = useState(false)
+  const [switching, setSwitching] = useState(null)
 
   const sorted = useMemo(
     () => [...availabilities].sort(SORTS[sort].fn),
     [availabilities, sort]
   )
+
+  useEffect(() => {
+    if (availabilities.length > 0 || !blood) { setNearby([]); return }
+    setNearbyLoading(true)
+    axios
+      .get(`/api/blood/nearby?blood=${blood}&exclude=${encodeURIComponent(city)}`)
+      .then(({ data }) => setNearby(data))
+      .catch(() => setNearby([]))
+      .finally(() => setNearbyLoading(false))
+  }, [availabilities.length, blood, city])
+
+  const searchNearbyCity = async (targetCity) => {
+    setSwitching(targetCity)
+    try {
+      const { data } = await axios.get(`/api/blood?city=${targetCity}&blood=${blood}`)
+      navigate('/guest/blood', { state: { availabilities: data, city: targetCity, blood }, replace: true })
+    } finally {
+      setSwitching(null)
+    }
+  }
 
   return (
     <div className="min-h-screen lg:min-h-full bg-zinc-950 flex flex-col">
@@ -61,6 +86,44 @@ export default function BloodResults() {
                 View Blood Requests in {city} →
               </Link>
             </div>
+
+            {nearbyLoading && (
+              <div className="flex justify-center mt-6">
+                <div className="w-5 h-5 border-2 border-zinc-700 border-t-zinc-400 rounded-full animate-spin" />
+              </div>
+            )}
+
+            {!nearbyLoading && nearby.length > 0 && (
+              <div className="mt-6 px-1">
+                <p className="text-zinc-600 text-xs font-semibold uppercase tracking-wide mb-3 text-center">
+                  {blood} available in nearby cities
+                </p>
+                <div className="space-y-2">
+                  {nearby.map((n) => (
+                    <button
+                      key={n.city}
+                      onClick={() => searchNearbyCity(n.city)}
+                      disabled={switching !== null}
+                      className="w-full flex items-center justify-between bg-zinc-800 hover:bg-zinc-700 border border-zinc-700/50 rounded-2xl px-4 py-3.5 transition-colors disabled:opacity-60"
+                    >
+                      <span className="font-semibold text-white text-sm">{n.city}</span>
+                      <span className="flex items-center gap-2 text-zinc-500 text-xs">
+                        {switching === n.city ? (
+                          <div className="w-3.5 h-3.5 border-2 border-zinc-600 border-t-zinc-300 rounded-full animate-spin" />
+                        ) : (
+                          <>
+                            {n.units} units
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" />
+                            </svg>
+                          </>
+                        )}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="space-y-3">

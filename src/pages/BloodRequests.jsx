@@ -29,6 +29,9 @@ function RequestCard({ req }) {
     })
   }
 
+  const shareText = `🩸 ${req.urgency === 'critical' ? 'URGENT — ' : ''}${req.blood_type} blood needed in ${req.city} for ${req.name}.${req.message ? ` "${req.message}"` : ''} Contact: ${req.contact}`
+  const shareUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`
+
   return (
     <div className={`bg-zinc-800 border rounded-2xl p-4 ${req.urgency === 'critical' ? 'border-red-600/50' : 'border-zinc-700/50'}`}>
       <div className="flex items-start justify-between gap-3 mb-3">
@@ -62,12 +65,25 @@ function RequestCard({ req }) {
             }
           </button>
         </div>
-        <a
-          href={`tel:${req.contact}`}
-          className="bg-green-600 hover:bg-green-500 text-white text-sm font-bold px-4 py-1.5 rounded-xl transition-colors flex-shrink-0"
-        >
-          Call
-        </a>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <a
+            href={shareUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Share on WhatsApp"
+            className="bg-zinc-700 hover:bg-[#25D366] text-zinc-300 hover:text-white p-2 rounded-xl transition-colors"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+              <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.74.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0012.04 2zm0 18.13h-.01c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.13 8.13 0 01-1.25-4.36c0-4.49 3.66-8.15 8.16-8.15 2.18 0 4.22.85 5.76 2.39a8.08 8.08 0 012.39 5.77c0 4.49-3.66 8.15-8.06 8.15zm4.47-6.1c-.24-.12-1.45-.72-1.68-.8-.22-.08-.39-.12-.55.12-.16.24-.63.8-.78.96-.14.16-.29.18-.53.06-.24-.12-1.02-.38-1.95-1.2-.72-.64-1.21-1.44-1.35-1.68-.14-.24-.01-.37.11-.49.11-.11.24-.29.36-.43.12-.14.16-.24.24-.4.08-.16.04-.31-.02-.43-.06-.12-.55-1.32-.75-1.81-.2-.48-.4-.41-.55-.42h-.47c-.16 0-.43.06-.65.31-.22.24-.86.84-.86 2.04s.88 2.37 1 2.53c.12.16 1.73 2.64 4.2 3.7.59.25 1.04.4 1.4.52.59.19 1.12.16 1.55.1.47-.07 1.45-.59 1.65-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28z"/>
+            </svg>
+          </a>
+          <a
+            href={`tel:${req.contact}`}
+            className="bg-green-600 hover:bg-green-500 text-white text-sm font-bold px-4 py-1.5 rounded-xl transition-colors flex-shrink-0"
+          >
+            Call
+          </a>
+        </div>
       </div>
     </div>
   )
@@ -92,7 +108,7 @@ function PostForm({ defaultCity, defaultBlood, onSuccess }) {
     try {
       await axios.post('/api/request', { name, contact, blood_type: blood, city, urgency, message })
       toast(`Request posted — ${blood} in ${city}`)
-      onSuccess({ blood, city })
+      onSuccess({ blood, city, name, contact, urgency, message })
     } catch (err) {
       const detail = err.response?.data?.detail
       if (Array.isArray(detail)) {
@@ -239,10 +255,20 @@ export default function BloodRequests() {
           </p>
           <p className="text-zinc-600 text-xs mb-8">It will be visible for 72 hours.</p>
           <div className="space-y-3">
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(`🩸 ${posted.urgency === 'critical' ? 'URGENT — ' : ''}${posted.blood} blood needed in ${posted.city} for ${posted.name}.${posted.message ? ` "${posted.message}"` : ''} Contact: ${posted.contact}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:brightness-110 active:scale-[0.98] text-white font-bold py-3.5 rounded-2xl transition-all"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.74.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0012.04 2zm0 18.13h-.01c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.13 8.13 0 01-1.25-4.36c0-4.49 3.66-8.15 8.16-8.15 2.18 0 4.22.85 5.76 2.39a8.08 8.08 0 012.39 5.77c0 4.49-3.66 8.15-8.06 8.15zm4.47-6.1c-.24-.12-1.45-.72-1.68-.8-.22-.08-.39-.12-.55.12-.16.24-.63.8-.78.96-.14.16-.29.18-.53.06-.24-.12-1.02-.38-1.95-1.2-.72-.64-1.21-1.44-1.35-1.68-.14-.24-.01-.37.11-.49.11-.11.24-.29.36-.43.12-.14.16-.24.24-.4.08-.16.04-.31-.02-.43-.06-.12-.55-1.32-.75-1.81-.2-.48-.4-.41-.55-.42h-.47c-.16 0-.43.06-.65.31-.22.24-.86.84-.86 2.04s.88 2.37 1 2.53c.12.16 1.73 2.64 4.2 3.7.59.25 1.04.4 1.4.52.59.19 1.12.16 1.55.1.47-.07 1.45-.59 1.65-1.16.2-.57.2-1.06.14-1.16-.06-.1-.22-.16-.46-.28z"/>
+              </svg>
+              Share on WhatsApp
+            </a>
             <button
               onClick={() => { setPosted(null); setTab('view') }}
-              className="w-full bg-red-600 hover:bg-red-500 active:scale-[0.98] text-white font-bold py-3.5 rounded-2xl transition-all"
-              style={{ boxShadow: '0 8px 30px rgba(220,38,38,0.3)' }}
+              className="w-full bg-zinc-800 hover:bg-zinc-700 active:scale-[0.98] text-white font-bold py-3.5 rounded-2xl transition-all border border-zinc-700/50"
             >
               View Active Requests
             </button>

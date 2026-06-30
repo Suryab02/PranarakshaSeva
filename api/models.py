@@ -7,6 +7,8 @@ class BloodCreate(BaseModel):
     quantity: int
     bankname: str
     city: str
+    lat: Optional[float] = None
+    lng: Optional[float] = None
 
 
 class BloodUpdate(BaseModel):

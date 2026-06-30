@@ -5,7 +5,27 @@ import os
 
 router = APIRouter()
 
-BLOODS = [
+# Approximate real-world coordinates of each hospital, used to place blood
+# bank pins on the live map instead of jittering them around the city center.
+BANK_COORDS = {
+    "Manipal Hospital Blood Bank":  (12.9608, 77.6387),
+    "Fortis Blood Bank":            (12.8896, 77.5970),
+    "Victoria Hospital Blood Bank": (12.9634, 77.5763),
+    "NIMS Blood Bank":              (17.4239, 78.4483),
+    "Yashoda Blood Bank":           (17.4179, 78.4514),
+    "Care Hospital Blood Bank":     (17.4126, 78.4475),
+    "KEM Hospital Blood Bank":      (19.0000, 72.8413),
+    "Lilavati Blood Bank":          (19.0509, 72.8295),
+    "AIIMS Blood Bank":             (28.5672, 77.2100),
+    "Safdarjung Blood Bank":        (28.5689, 77.2067),
+    "Sassoon Hospital Blood Bank":  (18.5293, 73.8587),
+    "Ruby Hall Blood Bank":         (18.5362, 73.8775),
+    "GMC Goa Blood Bank":           (15.4607, 73.8390),
+    "King George Hospital BB":      (17.7128, 83.3022),
+    "Apollo Vizag Blood Bank":      (17.7572, 83.3066),
+}
+
+_BLOODS_RAW = [
     {"bankname": "Manipal Hospital Blood Bank", "city": "Bengaluru", "name": "A+",  "quantity": 12},
     {"bankname": "Manipal Hospital Blood Bank", "city": "Bengaluru", "name": "B+",  "quantity": 8},
     {"bankname": "Manipal Hospital Blood Bank", "city": "Bengaluru", "name": "O+",  "quantity": 15},
@@ -35,6 +55,11 @@ BLOODS = [
     {"bankname": "King George Hospital BB",     "city": "Vizag",     "name": "O+",  "quantity": 10},
     {"bankname": "King George Hospital BB",     "city": "Vizag",     "name": "A+",  "quantity": 7},
     {"bankname": "Apollo Vizag Blood Bank",     "city": "Vizag",     "name": "B+",  "quantity": 4},
+]
+
+BLOODS = [
+    {**b, "lat": BANK_COORDS[b["bankname"]][0], "lng": BANK_COORDS[b["bankname"]][1]}
+    for b in _BLOODS_RAW
 ]
 
 DOCTORS = [
