@@ -42,28 +42,48 @@ const ICONS = {
 }
 
 // ── Overpass ─────────────────────────────────────────────────────────────────
+// overpass-api.de is the canonical instance but is heavily rate-limited and
+// frequently times out; fall back to mirrors so "live" data doesn't silently die.
+const OVERPASS_MIRRORS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.openstreetmap.fr/api/interpreter',
+]
+
 async function fetchOverpass(lat, lng, radiusM = 15000) {
   const amenities = ['hospital', 'clinic', 'doctors']
   const filters = amenities.flatMap((a) => [
     `node["amenity"="${a}"](around:${radiusM},${lat},${lng});`,
     `way["amenity"="${a}"](around:${radiusM},${lat},${lng});`,
   ]).join('')
-  const query = `[out:json][timeout:25];(${filters});out center;`
-  const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`
-  const res = await fetch(url)
-  if (!res.ok) throw new Error(`Overpass ${res.status}`)
-  const json = await res.json()
-  return json.elements
-    .map((e) => ({
-      id:   e.id,
-      type: e.tags?.amenity,
-      lat:  e.lat ?? e.center?.lat,
-      lon:  e.lon ?? e.center?.lon,
-      name: e.tags?.name ?? null,
-      phone: e.tags?.['contact:phone'] || e.tags?.phone || null,
-      addr: e.tags?.['addr:full'] || e.tags?.['addr:street'] || null,
-    }))
-    .filter((e) => e.lat && e.lon)
+  const query = `[out:json][timeout:20];(${filters});out center;`
+  const qs = `?data=${encodeURIComponent(query)}`
+
+  let lastErr
+  for (const base of OVERPASS_MIRRORS) {
+    try {
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), 12000)
+      const res = await fetch(base + qs, { signal: controller.signal })
+      clearTimeout(timer)
+      if (!res.ok) throw new Error(`Overpass ${res.status}`)
+      const json = await res.json()
+      return json.elements
+        .map((e) => ({
+          id:   e.id,
+          type: e.tags?.amenity,
+          lat:  e.lat ?? e.center?.lat,
+          lon:  e.lon ?? e.center?.lon,
+          name: e.tags?.name ?? null,
+          phone: e.tags?.['contact:phone'] || e.tags?.phone || null,
+          addr: e.tags?.['addr:full'] || e.tags?.['addr:street'] || null,
+        }))
+        .filter((e) => e.lat && e.lon)
+    } catch (err) {
+      lastErr = err
+    }
+  }
+  throw lastErr
 }
 
 // ── close sheet when map is tapped ───────────────────────────────────────────
@@ -152,21 +172,25 @@ export default function MapView() {
   const [osmPoints,    setOsmPoints]    = useState([])
   const [loading,      setLoading]      = useState(true)
   const [osmOk,        setOsmOk]        = useState(null)
+  const [osmRetrying,  setOsmRetrying]  = useState(false)
+  const [retryToken,   setRetryToken]   = useState(0)
   const [selected,     setSelected]     = useState(null)
   const [filters,      setFilters]      = useState({ blood: true, doctor: true, hospital: true })
 
   useEffect(() => {
-    const dbFetch = axios
+    axios
       .get(`/api/blood?city=${city}${blood ? `&blood=${blood}` : ''}`)
       .then(({ data }) => setBloodBanks(data))
       .catch(() => {})
+  }, [city])
 
-    const osmFetch = fetchOverpass(center[0], center[1])
+  useEffect(() => {
+    setOsmRetrying(retryToken > 0)
+    fetchOverpass(center[0], center[1])
       .then((pts) => { setOsmPoints(pts); setOsmOk(true) })
       .catch(() => setOsmOk(false))
-
-    Promise.allSettled([dbFetch, osmFetch]).then(() => setLoading(false))
-  }, [city])
+      .finally(() => { setLoading(false); setOsmRetrying(false) })
+  }, [city, retryToken])
 
   const closeSheet = useCallback(() => setSelected(null), [])
   const toggleFilter = (key) => setFilters((f) => ({ ...f, [key]: !f[key] }))
@@ -197,7 +221,16 @@ export default function MapView() {
             <p className="text-zinc-500 text-sm mt-0.5">{city}{blood ? ` · ${blood}` : ''}</p>
           </div>
           {osmOk === false && (
-            <span className="text-yellow-500 text-[11px] font-semibold">Live data unavailable</span>
+            <div className="flex items-center gap-2">
+              <span className="text-yellow-500 text-[11px] font-semibold">Live data unavailable</span>
+              <button
+                onClick={() => setRetryToken((t) => t + 1)}
+                disabled={osmRetrying}
+                className="text-yellow-500 hover:text-yellow-400 text-[11px] font-bold underline underline-offset-2 disabled:opacity-50"
+              >
+                {osmRetrying ? 'Retrying…' : 'Retry'}
+              </button>
+            </div>
           )}
         </div>
 
