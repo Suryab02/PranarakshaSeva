@@ -12,9 +12,19 @@ import time
 import base64
 import hashlib
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "dev-insecure-change-me-in-production")
+_DEFAULT_SECRET = "dev-insecure-change-me-in-production"
+SECRET_KEY = os.environ.get("SECRET_KEY", _DEFAULT_SECRET)
 _PBKDF2_ITERATIONS = 200_000
 TOKEN_TTL_SECONDS = 60 * 60 * 8  # 8 hours
+
+# A known secret means anyone can forge admin tokens. Refuse to run with the
+# throwaway dev secret in a deployed (Vercel) environment — fail loudly at
+# import time rather than silently accepting forged sessions in production.
+if SECRET_KEY == _DEFAULT_SECRET and os.environ.get("VERCEL"):
+    raise RuntimeError(
+        "SECRET_KEY is not set in production. Configure a strong random "
+        "SECRET_KEY environment variable before deploying."
+    )
 
 
 # ── password hashing ────────────────────────────────────────────────────────

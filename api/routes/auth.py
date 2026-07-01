@@ -26,11 +26,27 @@ async def login(body: LoginRequest):
 
 @router.post("/register", status_code=201)
 async def register(body: RegisterRequest):
+    username = body.username.strip()
+    bankname = body.bankname.strip()
+    if len(username) < 3:
+        raise HTTPException(status_code=422, detail="Username must be at least 3 characters")
+    if len(body.password) < 8:
+        raise HTTPException(status_code=422, detail="Password must be at least 8 characters")
+    if not bankname:
+        raise HTTPException(status_code=422, detail="Bank name is required")
+
     db = get_db()
-    existing = await db["users"].find_one({"username": body.username})
-    if existing:
+    if await db["users"].find_one({"username": username}):
         raise HTTPException(status_code=409, detail="Username already exists")
-    doc = body.model_dump()
-    doc["password"] = hash_password(body.password)
+    # A bank may have only one admin account. Without this check anyone could
+    # register a fresh username against an existing bank's name and seize
+    # control of its blood inventory.
+    if await db["users"].find_one({"bankname": bankname}):
+        raise HTTPException(
+            status_code=409,
+            detail="This blood bank already has an administrator account.",
+        )
+
+    doc = {"username": username, "bankname": bankname, "password": hash_password(body.password)}
     await db["users"].insert_one(doc)
     return {"message": "User registered successfully"}
