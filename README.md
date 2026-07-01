@@ -63,7 +63,7 @@ If `ADMIN_INVITE_SECRET` is unset, invite creation is disabled entirely.
 | Variable | Purpose |
 | --- | --- |
 | `MONGO_URI` | MongoDB connection string |
-| `SECRET_KEY` | Random secret for signing admin tokens (**required in production**) |
+| `SECRET_KEY` | Random secret for signing admin tokens (**strongly recommended in production**; without it, admin sessions won't persist across instances) |
 | `ADMIN_INVITE_SECRET` | Operator secret for minting admin invites |
 | `ALLOWED_ORIGINS` | Comma-separated CORS origins (optional; defaults to localhost) |
 | `SEED_KEY` | Guards re-seeding once the DB has data |

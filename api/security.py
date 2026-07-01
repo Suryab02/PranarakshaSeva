@@ -14,18 +14,35 @@ import hashlib
 import secrets
 
 _DEFAULT_SECRET = "dev-insecure-change-me-in-production"
-SECRET_KEY = os.environ.get("SECRET_KEY", _DEFAULT_SECRET)
 _PBKDF2_ITERATIONS = 200_000
 TOKEN_TTL_SECONDS = 60 * 60 * 8  # 8 hours
 
-# A known secret means anyone can forge admin tokens. Refuse to run with the
-# throwaway dev secret in a deployed (Vercel) environment — fail loudly at
-# import time rather than silently accepting forged sessions in production.
-if SECRET_KEY == _DEFAULT_SECRET and os.environ.get("VERCEL"):
-    raise RuntimeError(
-        "SECRET_KEY is not set in production. Configure a strong random "
-        "SECRET_KEY environment variable before deploying."
-    )
+
+def _resolve_secret() -> str:
+    """Choose the token-signing secret without ever taking the app down.
+
+    A known secret means anyone can forge admin tokens, so we never sign with
+    the public default in a deployed (Vercel) environment. But crashing at
+    import would also take down every *public* lookup (blood banks, ambulances)
+    in a life-critical app, so instead we fall back to a strong random
+    per-process secret. Admin sessions then won't survive across serverless
+    instances until SECRET_KEY is configured — a nudge, not an outage.
+    """
+    configured = os.environ.get("SECRET_KEY", "").strip()
+    if configured:
+        return configured
+    if os.environ.get("VERCEL"):
+        import warnings
+        warnings.warn(
+            "SECRET_KEY is not set; using an ephemeral random secret. Admin "
+            "sessions will not persist across instances until you set SECRET_KEY."
+        )
+        return secrets.token_urlsafe(48)
+    # Local/dev: keep a stable default so tokens survive reloads.
+    return _DEFAULT_SECRET
+
+
+SECRET_KEY = _resolve_secret()
 
 
 # ── password hashing ────────────────────────────────────────────────────────
