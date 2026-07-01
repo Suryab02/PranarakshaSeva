@@ -34,7 +34,41 @@ ADMIN PAGE:
 ![Screenshot 2023-08-10 223113](https://github.com/Suryab02/PranarakshaSeva/assets/115476816/dd2ec581-a8dc-426b-ae1a-f3648a6727a5)
 
 
-FULL PROJECT EXPLAINED HERE :
+## Admin onboarding (invite-only)
+
+Blood-bank admin accounts are **invite-only** — there is no open self-service
+registration, so no one can claim a bank they don't operate. The flow:
+
+1. **Operator mints an invite** for a specific bank. This requires the
+   `ADMIN_INVITE_SECRET` environment variable to be set on the server:
+
+   ```bash
+   curl -X POST https://<your-app>/api/auth/invite \
+     -H "x-invite-secret: $ADMIN_INVITE_SECRET" \
+     -H "Content-Type: application/json" \
+     -d '{"bankname": "Apollo Hospital Blood Bank"}'
+   # → { "code": "AbCd...", "bankname": "...", "expires_at": "..." }
+   ```
+
+   The one-time code is returned once. Hand it to the bank out-of-band.
+
+2. **The bank registers** at the Register screen using that code. The bank
+   name comes from the invite (the user can't choose it), the code is
+   single-use, and it expires after 7 days.
+
+If `ADMIN_INVITE_SECRET` is unset, invite creation is disabled entirely.
+
+## Required environment variables
+
+| Variable | Purpose |
+| --- | --- |
+| `MONGO_URI` | MongoDB connection string |
+| `SECRET_KEY` | Random secret for signing admin tokens (**required in production**) |
+| `ADMIN_INVITE_SECRET` | Operator secret for minting admin invites |
+| `ALLOWED_ORIGINS` | Comma-separated CORS origins (optional; defaults to localhost) |
+| `SEED_KEY` | Guards re-seeding once the DB has data |
+
+## FULL PROJECT EXPLAINED HERE :
 
 https://drive.google.com/file/d/1Ttflj2opV_mNWhbLAnsWG8En2IqegC-5/view?usp=drive_link
 
