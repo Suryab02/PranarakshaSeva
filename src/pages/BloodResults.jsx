@@ -3,6 +3,7 @@ import { useLocation, useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
 import SOSButton from '../components/SOSButton'
 import EmptyState from '../components/EmptyState'
+import { useRequireCity } from '../lib/useRequireCity'
 
 const SORTS = {
   units: { label: 'Most units', fn: (a, b) => (b.quantity ?? 0) - (a.quantity ?? 0) },
@@ -18,6 +19,7 @@ export default function BloodResults() {
   const [nearby, setNearby] = useState([])
   const [nearbyLoading, setNearbyLoading] = useState(false)
   const [switching, setSwitching] = useState(null)
+  useRequireCity(city)
 
   const sorted = useMemo(
     () => [...availabilities].sort(SORTS[sort].fn),
@@ -43,6 +45,8 @@ export default function BloodResults() {
       setSwitching(null)
     }
   }
+
+  if (!city) return null
 
   return (
     <div className="min-h-screen lg:min-h-full bg-zinc-950 flex flex-col">

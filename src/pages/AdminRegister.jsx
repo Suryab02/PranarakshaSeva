@@ -10,6 +10,8 @@ export default function AdminRegister() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
+  const [bankname, setBankname] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -19,18 +21,23 @@ export default function AdminRegister() {
       setError('Passwords do not match')
       return
     }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters')
+      return
+    }
     setError('')
     setLoading(true)
     try {
-      await axios.post('/api/auth/register', {
+      const { data } = await axios.post('/api/auth/register', {
         username: e.target.username.value,
         password,
-        bankname: e.target.bankname.value,
+        invite_code: e.target.invite_code.value.trim(),
       })
+      setBankname(data?.bankname || '')
       setSuccess(true)
     } catch (err) {
       const detail = err.response?.data?.detail
-      setError(detail || 'Registration failed. Try a different username.')
+      setError(detail || 'Registration failed. Check your invite code and try again.')
     } finally {
       setLoading(false)
     }
@@ -48,7 +55,9 @@ export default function AdminRegister() {
           </div>
           <h2 className="text-3xl font-black text-white mb-2">Account Created</h2>
           <p className="text-zinc-400 text-sm mb-8 leading-relaxed">
-            Your blood bank admin account is ready. Sign in to manage your inventory.
+            Your admin account for{' '}
+            <span className="text-white font-semibold">{bankname || 'your blood bank'}</span>{' '}
+            is ready. Sign in to manage your inventory.
           </p>
           <button
             onClick={() => navigate('/admin')}
@@ -80,27 +89,46 @@ export default function AdminRegister() {
           </svg>
         </div>
         <h1 className="text-4xl font-black text-white mb-1">Register<br />Blood Bank</h1>
-        <p className="text-zinc-500 text-sm mb-10">Create an admin account to manage your blood bank inventory.</p>
+        <p className="text-zinc-500 text-sm mb-10">Enter the invite code from your PranarakshaSeva coordinator to set up your bank's admin account.</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className={labelCls}>Blood Bank Name</label>
-            <input name="bankname" type="text" required placeholder="e.g. Apollo Hospital Blood Bank" className={inputCls} />
+            <label className={labelCls}>Invite Code</label>
+            <input
+              name="invite_code"
+              type="text"
+              required
+              autoComplete="off"
+              spellCheck={false}
+              placeholder="Paste your invite code"
+              className={`${inputCls} font-mono tracking-wide`}
+            />
+            <p className="text-zinc-600 text-xs mt-2">Your invite determines which blood bank you'll manage.</p>
           </div>
 
           <div>
             <label className={labelCls}>Username</label>
-            <input name="username" type="text" required autoComplete="username" placeholder="Choose a username" className={inputCls} />
+            <input name="username" type="text" required minLength={3} autoComplete="username" placeholder="Choose a username" className={inputCls} />
           </div>
 
           <div>
             <label className={labelCls}>Password</label>
-            <input name="password" type="password" required autoComplete="new-password" placeholder="Create a password" className={inputCls} />
+            <div className="relative">
+              <input name="password" type={showPassword ? 'text' : 'password'} required minLength={8} autoComplete="new-password" placeholder="At least 8 characters" className={`${inputCls} pr-16`} />
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 text-xs font-semibold uppercase tracking-wide"
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
           </div>
 
           <div>
             <label className={labelCls}>Confirm Password</label>
-            <input name="confirm" type="password" required autoComplete="new-password" placeholder="Repeat password" className={inputCls} />
+            <input name="confirm" type={showPassword ? 'text' : 'password'} required autoComplete="new-password" placeholder="Repeat password" className={inputCls} />
           </div>
 
           {error && (

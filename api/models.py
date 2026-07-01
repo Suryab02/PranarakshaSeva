@@ -38,6 +38,10 @@ class LoginRequest(BaseModel):
 class RegisterRequest(BaseModel):
     username: str
     password: str
+    invite_code: str
+
+
+class InviteCreate(BaseModel):
     bankname: str
 
 

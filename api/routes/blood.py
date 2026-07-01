@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Query, Depends
+from fastapi import APIRouter, Query, Depends, HTTPException
 from pymongo import ReturnDocument
 from api.database import get_db
 from api.models import BloodCreate, BloodUpdate
 from api.deps import require_admin
+from api.constants import VALID_BLOOD
 
 router = APIRouter()
 
@@ -40,11 +41,16 @@ async def get_nearby(blood: str = Query(...), exclude: str = Query(None)):
 
 
 @router.post("", status_code=201)
-async def add_blood(body: BloodCreate):
+async def add_blood(body: BloodCreate, admin: dict = Depends(require_admin)):
+    if body.name not in VALID_BLOOD:
+        raise HTTPException(400, "Invalid blood type")
     db = get_db()
-    result = await db["bloods"].insert_one(body.model_dump())
-    doc = await db["bloods"].find_one({"_id": result.inserted_id})
-    return serialize(doc)
+    # An admin may only create stock for their own bank — never trust the
+    # client-supplied bankname, which could target another bank's records.
+    doc = {**body.model_dump(), "bankname": admin["bank"]}
+    result = await db["bloods"].insert_one(doc)
+    saved = await db["bloods"].find_one({"_id": result.inserted_id})
+    return serialize(saved)
 
 
 # ── inventory: admin-only, scoped to the authenticated bank ──────────────────

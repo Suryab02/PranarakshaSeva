@@ -14,6 +14,7 @@ import DonorRegister from './pages/DonorRegister'
 import MapView from './pages/MapView'
 import BloodRequests from './pages/BloodRequests'
 import AdminRegister from './pages/AdminRegister'
+import OperatorInvite from './pages/OperatorInvite'
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
             <Route path="/donor/register" element={<DonorRegister />} />
             <Route path="/guest/requests" element={<BloodRequests />} />
             <Route path="/admin/register" element={<AdminRegister />} />
+            <Route path="/operator" element={<OperatorInvite />} />
           </Routes>
         </AppShell>
       </Router>

@@ -1,17 +1,12 @@
-import re
 from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Query, HTTPException
 from pydantic import BaseModel, field_validator
 from api.database import get_db
+from api.constants import VALID_BLOOD, VALID_CITIES, PHONE_RE, clean_text
 
 router = APIRouter()
 
-VALID_BLOOD  = {'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'}
-VALID_CITIES = {'Bengaluru', 'Hyderabad', 'Mumbai', 'Delhi', 'Pune', 'Goa', 'Vizag'}
 VALID_URGENCY = {'normal', 'critical'}
-
-PHONE_RE = re.compile(r'^\d{10}$')
-SAFE_TEXT_RE = re.compile(r'[<>"\']')          # block HTML-injection chars in free text
 
 
 class BloodRequestCreate(BaseModel):
@@ -25,7 +20,7 @@ class BloodRequestCreate(BaseModel):
     @field_validator('name')
     @classmethod
     def clean_name(cls, v: str) -> str:
-        v = SAFE_TEXT_RE.sub('', v).strip()
+        v = clean_text(v)
         if not 2 <= len(v) <= 60:
             raise ValueError('Name must be 2–60 characters')
         return v
@@ -60,7 +55,7 @@ class BloodRequestCreate(BaseModel):
     @field_validator('message')
     @classmethod
     def clean_message(cls, v: str) -> str:
-        v = SAFE_TEXT_RE.sub('', v).strip()
+        v = clean_text(v)
         return v[:150]                          # hard cap — never trust client
 
 

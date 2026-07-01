@@ -11,10 +11,21 @@ import json
 import time
 import base64
 import hashlib
+import secrets
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "dev-insecure-change-me-in-production")
+_DEFAULT_SECRET = "dev-insecure-change-me-in-production"
+SECRET_KEY = os.environ.get("SECRET_KEY", _DEFAULT_SECRET)
 _PBKDF2_ITERATIONS = 200_000
 TOKEN_TTL_SECONDS = 60 * 60 * 8  # 8 hours
+
+# A known secret means anyone can forge admin tokens. Refuse to run with the
+# throwaway dev secret in a deployed (Vercel) environment — fail loudly at
+# import time rather than silently accepting forged sessions in production.
+if SECRET_KEY == _DEFAULT_SECRET and os.environ.get("VERCEL"):
+    raise RuntimeError(
+        "SECRET_KEY is not set in production. Configure a strong random "
+        "SECRET_KEY environment variable before deploying."
+    )
 
 
 # ── password hashing ────────────────────────────────────────────────────────
@@ -46,6 +57,18 @@ def verify_password(password: str, stored: str) -> bool:
 def needs_rehash(stored: str) -> bool:
     """True for legacy plaintext passwords that should be upgraded on next login."""
     return not (stored or "").startswith("pbkdf2_sha256$")
+
+
+# ── invite codes ────────────────────────────────────────────────────────────
+def generate_invite_code() -> str:
+    """High-entropy, URL-safe one-time invite code (~72 bits)."""
+    return secrets.token_urlsafe(9)
+
+
+def hash_invite(code: str) -> str:
+    """Store only the hash so a DB leak never exposes usable invite codes.
+    Codes are already high-entropy, so a plain SHA-256 is sufficient here."""
+    return hashlib.sha256(code.encode()).hexdigest()
 
 
 # ── signed tokens ───────────────────────────────────────────────────────────
