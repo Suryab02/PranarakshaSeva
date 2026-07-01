@@ -11,6 +11,7 @@ export default function AdminRegister() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [bankname, setBankname] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -112,12 +113,22 @@ export default function AdminRegister() {
 
           <div>
             <label className={labelCls}>Password</label>
-            <input name="password" type="password" required minLength={8} autoComplete="new-password" placeholder="At least 8 characters" className={inputCls} />
+            <div className="relative">
+              <input name="password" type={showPassword ? 'text' : 'password'} required minLength={8} autoComplete="new-password" placeholder="At least 8 characters" className={`${inputCls} pr-16`} />
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 text-xs font-semibold uppercase tracking-wide"
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
           </div>
 
           <div>
             <label className={labelCls}>Confirm Password</label>
-            <input name="confirm" type="password" required autoComplete="new-password" placeholder="Repeat password" className={inputCls} />
+            <input name="confirm" type={showPassword ? 'text' : 'password'} required autoComplete="new-password" placeholder="Repeat password" className={inputCls} />
           </div>
 
           {error && (

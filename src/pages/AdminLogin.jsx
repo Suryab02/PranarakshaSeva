@@ -7,6 +7,7 @@ export default function AdminLogin() {
   const navigate = useNavigate()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -65,14 +66,24 @@ export default function AdminLogin() {
             <label className="block text-zinc-500 text-[10px] font-bold uppercase tracking-[0.2em] mb-2">
               Password
             </label>
-            <input
-              name="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              placeholder="Enter password"
-              className="w-full bg-zinc-900 border border-zinc-800 focus:border-red-500 rounded-xl px-4 py-3.5 text-white placeholder-zinc-600 focus:outline-none transition-colors text-[15px]"
-            />
+            <div className="relative">
+              <input
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                required
+                autoComplete="current-password"
+                placeholder="Enter password"
+                className="w-full bg-zinc-900 border border-zinc-800 focus:border-red-500 rounded-xl px-4 py-3.5 pr-16 text-white placeholder-zinc-600 focus:outline-none transition-colors text-[15px]"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 text-xs font-semibold uppercase tracking-wide"
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
           </div>
 
           {error && (
@@ -92,12 +103,12 @@ export default function AdminLogin() {
         </form>
 
         <div className="mt-8 pt-6 border-t border-zinc-900 text-center">
-          <p className="text-zinc-600 text-sm">New blood bank?</p>
+          <p className="text-zinc-600 text-sm">Have an invite code?</p>
           <button
             onClick={() => navigate('/admin/register')}
             className="text-red-500 hover:text-red-400 font-semibold text-sm mt-1 transition-colors"
           >
-            Register your blood bank →
+            Set up your blood bank →
           </button>
         </div>
       </div>
