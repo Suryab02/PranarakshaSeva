@@ -2,11 +2,14 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import SOSButton from '../components/SOSButton'
 import EmptyState from '../components/EmptyState'
+import { useRequireCity } from '../lib/useRequireCity'
 
 export default function DoctorResults() {
   const navigate = useNavigate()
   const { availabilities = [], city, blood } = useLocation().state ?? {}
   const [copied, setCopied] = useState(null)
+  useRequireCity(city)
+  if (!city) return null
 
   const copyNum = (num) => {
     navigator.clipboard.writeText(num).then(() => {
